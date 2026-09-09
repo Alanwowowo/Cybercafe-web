@@ -12,6 +12,8 @@ header {
     padding: 15px 40px;
     background-color: #171727;
     border-bottom: 3px solid #8b5cf6;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 header h1 {
@@ -20,12 +22,20 @@ header h1 {
     font-size: 1.5rem;
 }
 
-header nav ul {
+header p{
+    margin: 0;
+    color: #b8b8c7;
+    font-size: 0.85rem;
+}
+
+header nav ul{
    display: flex;
     list-style: none;
     gap: 8px;
     margin: 0;
     padding: 0;
+    flex-wrap: wrap;
+    
 }
 
 header nav a{
@@ -50,19 +60,24 @@ header nav a.active {
 
 main {
     padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 section {
     max-width: 1000px;
-    margin: 0 auto;
+    margin: 0 auto 25px auto;
     padding: 20px;
     background-color: #191925;
     border: 1px solid #3f3f5a;
     border-left: 4px solid #8b5cf6;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
 }
 
 h2 {
     color: #c4b5fd;
+    margin-bottom: 20px;
 }
 
 footer {
@@ -75,4 +90,11 @@ footer {
     text-align: center;
     background-color: #171727;
     border-top: 1px solid #3f3f5a;
+    margin-top: 40px;
+    flex-wrap: wrap;
+} 
+
+footer p{
+    margin: 0;
+    font-size: 0.85rem;
 }

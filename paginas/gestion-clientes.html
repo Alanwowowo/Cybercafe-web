@@ -30,8 +30,41 @@
 
     <main>
         <section>
-            <h2>Gestión de clientes</h2>
-            <p>Vista en desarrollo.</p>
+            <h2>Registrar nuevo cliente</h2>
+            <form id="form-cliente">
+                <div>
+                    <label for="id-cliente">ID / RUT:</label>
+                    <input type="text" id="id-cliente" required placeholder="">
+                </div>
+                <div>
+                    <label for="nombre-cliente">Nombre y Apellido:</label>
+                    <input type="text" id="nombre-cliente" required placeholder="">
+                </div>
+                <div>
+                    <label for="correo-cliente">Email:</label>
+                    <input type="text" id="correo-cliente" required placeholder="">
+                </div>
+                <button type="submit">Registrar Cliente</button>
+            </form>
+        </section>
+        <section>
+            <h2>Buscar Clientes</h2>
+            <input type="text" id="buscar-cliente" placeholder="ID, Nombre o Email">
+        </section>
+        <section>
+            <h2>Lista de Clientes</h2>
+            <table id="tabla-clientes">
+                <thead>
+                    <tr>
+                        <th>ID / RUT</th>
+                        <th>Nombre y Apellido</th>
+                        <th>Email</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
         </section>
     </main>
 
