@@ -203,3 +203,202 @@ if (listaComputadores) {
         }
     });
 }
+
+/* Gestión de computadores */
+const botonAgregarCuenta = document.getElementById(
+    "boton-agregar-cuenta"
+)
+
+const formularioCuenta = document.getElementById(
+    "formulario-cuenta"
+)
+
+const botonCancelarCuenta = document.getElementById(
+    "boton-cancelar-cuenta"
+)
+
+if (botonAgregarCuenta && formularioCuenta && botonCancelarCuenta) {
+    botonAgregarCuenta.addEventListener("click", function () {
+        formularioCuenta.classList.remove("oculto");
+    });
+
+    botonCancelarCuenta.addEventListener("click", function () {
+        formularioCuenta.classList.add("oculto");
+        formularioCuenta.reset();
+    });
+}
+
+const nombreCuenta = document.getElementById("nombre-cuenta");
+const correoCuenta = document.getElementById("correo-cuenta");
+const rolCuenta = document.getElementById("rol-cuenta");
+const estadoCuenta = document.getElementById("estado-cuenta");
+const listaCuentas = document.getElementById("lista-cuentas");
+
+if (
+    formularioCuenta &&
+    nombreCuenta &&
+    correoCuenta &&
+    rolCuenta &&
+    estadoCuenta &&
+    listaCuentas
+) {
+    formularioCuenta.addEventListener("submit", function (evento) {
+        evento.preventDefault();
+
+        const nombre = nombreCuenta.value.trim();
+        const correo = correoCuenta.value.trim();
+        const rol = rolCuenta.value;
+        const estado = estadoCuenta.value;
+
+        let textoEstado = "Activo";
+        let claseEstado = "punto-activo";
+
+        if (estado === "inactivo") {
+            textoEstado = "Inactivo";
+            claseEstado = "punto-inactivo";
+        }
+
+        const nuevaFila = listaCuentas.insertRow();
+
+        const celdaNombre = nuevaFila.insertCell();
+        const celdaCorreo = nuevaFila.insertCell();
+        const celdaRol = nuevaFila.insertCell();
+        const celdaEstado = nuevaFila.insertCell();
+        const celdaAcciones = nuevaFila.insertCell();
+
+        celdaNombre.textContent = nombre;
+        celdaCorreo.textContent = correo;
+        celdaRol.textContent = rol;
+
+        const puntoEstado = document.createElement("span");
+        puntoEstado.classList.add("punto-estado", claseEstado);
+
+        celdaEstado.appendChild(puntoEstado);
+        celdaEstado.append(" " + textoEstado);
+        
+        const botonEditar = document.createElement("button");
+        botonEditar.type = "button";
+        botonEditar.textContent = "Editar";
+        botonEditar.classList.add("boton-editar-cuenta");
+
+        const botonEliminar = document.createElement("button");
+        botonEliminar.type = "button";
+        botonEliminar.textContent = "Eliminar";
+        botonEliminar.classList.add("boton-eliminar-cuenta");
+
+        celdaAcciones.appendChild(botonEditar);
+        celdaAcciones.append(" ");
+        celdaAcciones.appendChild(botonEliminar);
+
+        formularioCuenta.reset();
+        formularioCuenta.classList.add("oculto");
+    });
+}   
+
+if (listaCuentas) {
+    listaCuentas.addEventListener("click", function (evento) {
+        const elementoPresionado = evento.target;
+        const filaCuenta = elementoPresionado.closest("tr");
+
+        if (!filaCuenta) {
+            return;
+        }
+
+        if (
+            elementoPresionado.classList.contains(
+                "boton-eliminar-cuenta"
+            )
+        ) {
+            const nombreUsuario = filaCuenta.cells[0].textContent;
+
+            const confirmarEliminacion = confirm(
+                "¿Deseas eliminar la cuenta de " + nombreUsuario + "?"
+            );
+
+            if (confirmarEliminacion) {
+                filaCuenta.remove();
+            }
+        }
+
+        if (
+            elementoPresionado.classList.contains(
+                "boton-editar-cuenta"
+            )
+        ) {
+            const nombreActual = filaCuenta.cells[0].textContent;
+            const correoActual = filaCuenta.cells[1].textContent;
+            const rolActual = filaCuenta.cells[2].textContent;
+
+            const puntoEstado = filaCuenta.querySelector(".punto-estado");
+
+            let estadoActual = "activa";
+
+            if (puntoEstado.classList.contains("punto-inactiva")) {
+                estadoActual = "inactiva";
+            }
+
+            const nuevoNombre = prompt(
+                "Nombre del usuario:",
+                nombreActual
+            );
+
+            if (nuevoNombre === null || nuevoNombre.trim() === "") {
+                return;
+            }
+
+            const nuevoCorreo = prompt(
+                "Correo electrónico:",
+                correoActual
+            );
+
+            if (nuevoCorreo === null || nuevoCorreo.trim() === "") {
+                return;
+            }
+
+            const nuevoRol = prompt(
+                "Rol: Administrador o Encargado",
+                rolActual
+            );
+
+            if (
+                nuevoRol !== "Administrador" &&
+                nuevoRol !== "Encargado"
+            ) {
+                alert("El rol ingresado no es válido.");
+                return;
+            }
+
+            const nuevoEstado = prompt(
+                "Estado: activa o inactiva",
+                estadoActual
+            );
+
+            if (
+                nuevoEstado !== "activa" &&
+                nuevoEstado !== "inactiva"
+            ) {
+                alert("El estado ingresado no es válido.");
+                return;
+            }
+
+            let textoEstado = "Activa";
+            let claseEstado = "punto-activa";
+
+            if (nuevoEstado === "inactiva") {
+                textoEstado = "Inactiva";
+                claseEstado = "punto-inactiva";
+            }
+
+            filaCuenta.cells[0].textContent = nuevoNombre.trim();
+            filaCuenta.cells[1].textContent = nuevoCorreo.trim();
+            filaCuenta.cells[2].textContent = nuevoRol;
+
+            const celdaEstado = filaCuenta.cells[3];
+
+            celdaEstado.textContent = "";
+            puntoEstado.className = "punto-estado " + claseEstado;
+            celdaEstado.appendChild(puntoEstado);
+            celdaEstado.append(" " + textoEstado);
+        }
+    });
+}

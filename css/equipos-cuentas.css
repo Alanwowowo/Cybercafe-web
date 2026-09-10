@@ -248,3 +248,90 @@
 .boton-cancelar {
     background-color: #6b7280;
 }
+
+/* Gestion de cuentas */
+.seccion-gestion-cuentas {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+#boton-agregar-cuenta {
+    padding: 10px 16px;
+    color: white;
+    background-color: #8b5cf6;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#boton-agregar-cuenta:hover {
+    background-color: #7c3aed;
+}
+
+.tabla-cuentas {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #242438;
+}
+
+.tabla-cuentas th,
+.tabla-cuentas td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #3f3f5a;
+}
+
+.tabla-cuentas th {
+    color: #c4b5fd;
+    background-color: #1c1c2b;
+}
+
+.tabla-cuentas tr:hover {
+    background-color: #2f2f48;
+}
+
+.punto-activa {
+    background-color: #22c55e;
+}
+
+.punto-inactiva {
+    background-color: #ef4444;
+}
+
+.boton-editar-cuenta,
+.boton-eliminar-cuenta {
+    padding: 7px 12px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.boton-editar-cuenta {
+    background-color: #8b5cf6;
+}
+
+.boton-editar-cuenta:hover {
+    background-color: #7c3aed;
+}
+
+.boton-eliminar-cuenta {
+    background-color: #dc2626;
+}
+
+.boton-eliminar-cuenta:hover {
+    background-color: #b91c1c;
+}
+
+.formulario-cuenta {
+    max-width: 500px;
+    padding: 20px;
+    margin-bottom: 25px;
+    background-color: #242438;
+    border: 1px solid #3f3f5a;
+    border-radius: 8px;
+}
+
+.formulario-cuenta.oculto {
+    display: none;
+}
