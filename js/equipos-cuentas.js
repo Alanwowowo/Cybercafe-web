@@ -204,7 +204,7 @@ if (listaComputadores) {
     });
 }
 
-/* Gestión de computadores */
+/* Gestión de cuentas */
 const botonAgregarCuenta = document.getElementById(
     "boton-agregar-cuenta"
 )
@@ -250,12 +250,12 @@ if (
         const rol = rolCuenta.value;
         const estado = estadoCuenta.value;
 
-        let textoEstado = "Activo";
-        let claseEstado = "punto-activo";
+        let textoEstado = "Activa";
+        let claseEstado = "punto-activa";
 
-        if (estado === "inactivo") {
-            textoEstado = "Inactivo";
-            claseEstado = "punto-inactivo";
+        if (estado === "inactiva") {
+            textoEstado = "Inactiva";
+            claseEstado = "punto-inactiva";
         }
 
         const nuevaFila = listaCuentas.insertRow();
