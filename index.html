@@ -7,13 +7,14 @@
     <title>CyberNet</title>
 
     <link rel="stylesheet" href="css/estilos.css">
-    <script src="js/aplicacion.js" defer></script>
+    <link rel="stylesheet" href="css/login.css">
+    <script src="js/paneles.js" defer></script>
 </head>
 
 <body>
     <header>
         <h1>CyberNet</h1>
-        <p>Sistema de gestión del cibercafé</p>
+        <h5>Sistema de gestión del cibercafé</h5>
     </header>
 
     <main>
@@ -21,6 +22,24 @@
             <h2>Bienvenido</h2>
             <p>Interfaz web en desarrollo.</p>
         </section>
+        <div class="login-card">
+            
+            <h1>Inicio Sesion</h1>
+            <form id="form-login" action="" method="">
+            
+            <div class="form-grupo">    
+            <label for="correo">Correo electronico:</label>
+            <input type="email" id="correo" name="correo">
+            </div>
+            
+            <div class="form-grupo">
+            <label for="password">Contraseña: </label>
+            <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="button-login">Inciar Sesion</button>
+            </form>
+        </div>
     </main>
 
     <footer>
