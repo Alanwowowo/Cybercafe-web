@@ -13,18 +13,175 @@
 
 <body>
     <header>
-        <h1>CyberNet</h1>
+       <h1>CyberNet</h1>
+        <nav>
+            <ul>
+                <li><a href="gestion-clientes.html">Gestión de clientes</a></li>
+                <li><a href="gestion-cuentas.html">Gestión de cuentas</a></li>
+                <li><a href="historial.html">Historial de sesiones</a></li>
+                <li><a href="inicio-admin.html">Inicio del administrador</a></li>
+                <li><a href="inicio-encargado.html">Inicio del encargado</a></li>
+                <li><a href="mapa-equipos.html">Mapa de equipos</a></li>
+                <li><a href="sesion.html">Registro y cierre de sesión</a></li>
+                <li><a href="../index.html">Inicio</a></li>
+            </ul>
+        </nav>
+        <p>Sistema de gestión del cibercafé</p>
     </header>
 
     <main>
-        <section>
-            <h2>Gestión de computadores</h2>
-            <p>Vista en desarrollo.</p>
+        <section class="seccion-gestion-computadores">
+            <div class="encabezado-seccion">
+                <div>
+                    <h2>Gestión de computadores</h2>
+                    <p>Administra los equipos disponibles en el cibercafé.</p>
+                </div>
+
+                <button type="button" id="boton-agregar-computador">
+                    Agregar computador
+                </button>
+            </div>
+
+        <form id="formulario-computador" class="formulario-computador oculto">
+            <h3>Agregar computador</h3>
+
+            <div class="campo-formulario">
+                <label for="nombre-computador">Nombre del equipo:</label>
+                <input
+                    type="text"
+                    id="nombre-computador"
+                    placeholder="Ejemplo: PC 07"
+                    required
+                >
+            </div>
+
+            <div class="campo-formulario">
+                <label for="estado-computador">Estado:</label>
+                <select id="estado-computador" required>
+                    <option value="disponible">Disponible</option>
+                    <option value="ocupado">En uso</option>
+                    <option value="fuera-servicio">Fuera de servicio</option>
+                </select>
+            </div>
+
+            <div class="campo-formulario">
+                <label for="ubicacion-computador">Ubicación:</label>
+                <select id="ubicacion-computador" required>
+                    <option value="Sala principal">Sala principal</option>
+                    <option value="Sala secundaria">Sala secundaria</option>
+                </select>
+            </div>
+
+            <div class="acciones-formulario">
+                <button type="submit" class="boton-guardar">
+                    Guardar
+                </button>
+
+                <button type="button" id="boton-cancelar" class="boton-cancelar">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+
+            <div class="contenedor-tabla">
+                <table class="tabla-computadores">
+                    <thead>
+                        <tr>
+                            <th>Equipo</th>
+                            <th>Estado</th>
+                            <th>Ubicación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="lista-computadores">
+                        <tr>
+                            <td>PC 01</td>
+                            <td>
+                                <span class="punto-estado punto-disponible"></span>
+                                Disponible
+                            </td>
+                            <td>Sala principal</td>
+                            <td>
+                                <button type="button" class="boton-editar">Editar</button>
+                                <button type="button" class="boton-eliminar">Eliminar</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>PC 02</td>
+                            <td>
+                                <span class="punto-estado punto-ocupado"></span>
+                                En uso
+                            </td>
+                            <td>Sala principal</td>
+                            <td>
+                                <button type="button" class="boton-editar">Editar</button>
+                                <button type="button" class="boton-eliminar">Eliminar</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>PC 03</td>
+                            <td>
+                                <span class="punto-estado punto-disponible"></span>
+                                Disponible
+                            </td>
+                            <td>Sala principal</td>
+                            <td>
+                                <button type="button" class="boton-editar">Editar</button>
+                                <button type="button" class="boton-eliminar">Eliminar</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>PC 04</td>
+                            <td>
+                                <span class="punto-estado punto-fuera-servicio"></span>
+                                Fuera de servicio
+                            </td>
+                            <td>Sala secundaria</td>
+                            <td>
+                                <button type="button" class="boton-editar">Editar</button>
+                                <button type="button" class="boton-eliminar">Eliminar</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>PC 05</td>
+                            <td>
+                                <span class="punto-estado punto-ocupado"></span>
+                                En uso
+                            </td>
+                            <td>Sala secundaria</td>
+                            <td>
+                                <button type="button" class="boton-editar">Editar</button>
+                                <button type="button" class="boton-eliminar">Eliminar</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>PC 06</td>
+                            <td>
+                                <span class="punto-estado punto-disponible"></span>
+                                Disponible
+                            </td>
+                            <td>Sala secundaria</td>
+                            <td>
+                                <button type="button" class="boton-editar">Editar</button>
+                                <button type="button" class="boton-eliminar">Eliminar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
     <footer>
-        <p>Proyecto CyberNet</p>
+        <p>©2026 CyberNet. Todos los derechos reservados.</p>
+        <p>Soporte: soporte@cybernet.com</p>
+        <p>Contacto: +56 9 1234 5678</p>
     </footer>
 
     <script src="../js/aplicacion.js"></script>
