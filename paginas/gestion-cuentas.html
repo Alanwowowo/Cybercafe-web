@@ -29,9 +29,144 @@
     </header>
 
     <main>
-        <section>
-            <h2>Gestión de cuentas</h2>
-            <p>Vista en desarrollo.</p>
+        <section class="seccion-gestion-cuentas">
+            <div class="encabezado-seccion">
+                <div>
+                    <h2>Gestión de cuentas</h2>
+                    <p>Administra las cuentas con acceso al sistema</p>
+                </div>
+
+                <button type="button" id="boton-agregar-cuenta">
+                    Agregar cuenta
+                </button>
+            </div>
+
+            <form id="formulario-cuenta" class="formulario-cuenta oculto">
+                <h3>Agregar cuenta</h3>
+
+                <div class="campo-formulario">
+                    <label for="nombre-cuenta">Nombre de usuario:</label>
+                    <input
+                        type="text"
+                        id="nombre-cuenta"
+                        placeholder="Ejemplo: Juan Pérez"
+                        required
+                    >
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="correo-cuenta">Correo electrónico:</label>
+                    <input
+                        type="email"
+                        id="correo-cuenta"
+                        placeholder="Ejemplo: juan.perez@cybernet.com"
+                        required
+                    >
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="rol-cuenta">Rol:</label>
+                    <select id="rol-cuenta" required>
+                        <option value="Administrador">Administrador</option>
+                        <option value="Encargado">Encargado</option>
+                    </select>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="estado-cuenta">Estado:</label>
+                    <select id="estado-cuenta" required>
+                        <option value="activa">Activa</option>
+                        <option value="inactiva">Inactiva</option>
+                    </select>
+                </div>
+
+                <div class="acciones-formulario">
+                    <button type="submit" class="boton-guardar">
+                        Guardar
+                    </button>
+
+                    <button 
+                        type="button"
+                        id="boton-cancelar-cuenta"
+                        class="boton-cancelar"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+
+            <div class="contenedor-tabla">
+                <table class="tabla-cuentas">
+                    <thead>
+                        <tr>
+                            <th>Nombre de usuario</th>
+                            <th>Correo electrónico</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="lista-cuentas">
+                        <tr>
+                            <td>Jaimito Rios</td>
+                            <td>admin@cybernet.com</td>
+                            <td>Administrador</td>
+                            <td>
+                                <span class="punto-estado punto-activa"></span>
+                                Activa
+                            </td>
+                            <td>
+                                <button type="button" class="boton-editar-cuenta">
+                                    Editar
+                                </button> 
+
+                                <button type="button" class="boton-eliminar-cuenta">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Elianny Ortega</td>
+                            <td>elianny.ortega@cybernet.com</td>
+                            <td>Encargado</td>
+                            <td>
+                                <span class="punto-estado punto-activa"></span>
+                                Activa
+                            </td>
+                            <td>
+                                <button type="button" class="boton-editar-cuenta">
+                                    Editar
+                                </button> 
+
+                                <button type="button" class="boton-eliminar-cuenta">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Roberto Carlos</td>
+                            <td>roberto.carlos@cybernet.com</td>
+                            <td>Encargado</td>
+                            <td>
+                                <span class="punto-estado punto-inactiva"></span>
+                                Inactiva
+                            </td>
+                            <td>
+                                <button type="button" class="boton-editar-cuenta">
+                                    Editar
+                                </button> 
+
+                                <button type="button" class="boton-eliminar-cuenta">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
