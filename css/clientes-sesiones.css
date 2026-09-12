@@ -1,32 +1,35 @@
-section h3 {
+input, select, button{
+    font-family: inherit;
+}
+
+section h3{
     color: #c4b5fd;
     margin-top: 0;
     margin-bottom: 18px;
     font-size: 1.15rem;
 }
 
-#form-cliente {
+#form-cliente, #inicio-sesion, #cierre-sesion, #filtros-historial{
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
     align-items: flex-end;
 }
 
-#form-cliente div {
+#form-cliente div, #inicio-sesion div, #cierre-sesion div, #filtros-historial div{
     display: flex;
     flex-direction: column;
     flex: 1 1 220px;
 }
 
-label {
+label{
     color: #b8b8c7;
     font-size: 0.85rem;
     font-weight: bold;
     margin-bottom: 6px;
 }
 
-input[type="text"],
-input[type="email"] {
+input[type="text"], input[type="email"], input[type="number"], input[type="date"], select{
     background-color: #0d0d14;
     border: 1px solid #3f3f5a;
     color: #f5f5f5;
@@ -36,27 +39,26 @@ input[type="email"] {
     outline: none;
     transition: all 0.2s ease;
     box-sizing: border-box;
+    width: 100%;
+    color-scheme: dark;
 }
 
-input[type="text"]::placeholder,
-input[type="email"]::placeholder {
+input[type="text"]::placeholder, input[type="email"]::placeholder, input[type="number"]::placeholder, input[type="date"]{
     color: #6b6b80;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus {
+input:focus, select:focus{
     border-color: #8b5cf6;
     box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
     background-color: #12121c;
 }
 
-#input-buscar {
+#buscar-cliente{
     width: 100%;
     max-width: 500px;
 }
 
-button[type="submit"],
-.btn-primario {
+button, .btn-primario{
     background-color: #8b5cf6;
     color: #ffffff;
     border: none;
@@ -68,13 +70,20 @@ button[type="submit"],
     transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-button[type="submit"]:hover,
-.btn-primario:hover {
+button:hover, .btn-primario:hover{
     background-color: #7c3aed;
     transform: translateY(-1px);
 }
 
-.btn-accion-editar {
+#btn-finalizar{
+    background-color: #ef4444;
+}
+
+#btn-finalizar:hover{
+    background-color: #dc2626;
+}
+
+.btn-accion-editar{
     background-color: #3b82f6;
     color: white;
     border: none;
@@ -85,11 +94,11 @@ button[type="submit"]:hover,
     margin-right: 6px;
 }
 
-.btn-accion-editar:hover {
+.btn-accion-editar:hover{
     background-color: #2563eb;
 }
 
-.btn-accion-historial {
+.btn-accion-historial{
     background-color: #06b6d4;
     color: white;
     border: none;
@@ -99,17 +108,47 @@ button[type="submit"]:hover,
     cursor: pointer;
 }
 
-.btn-accion-historial:hover {
+.btn-accion-historial:hover{
     background-color: #0891b2;
 }
 
-table {
+#detalle-resumen{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    background-color: #0d0d14;
+    padding: 18px;
+    border-radius: 8px;
+    border: 1px solid #3f3f5a;
+}
+
+#detalle-resumen p{
+    margin: 0;
+    color: #b8b8c7;
+    font-size: 0,95rem;
+}
+
+#detalle-resumen p span{
+    color: #ffffff;
+    font-weight: bold;
+}
+
+#detalle-resumen p:last-child{
+    grid-column: 1 / -1;
+    font-size: 1,15rem;
+    color: #c4b5fd;
+    border-top: 1px solid #3f3f5a;
+    padding-top: 12px;
+    margin-top: 4px;
+}
+
+table{
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
 }
 
-table th {
+table th{
     background-color: #171727;
     color: #c4b5fd;
     text-align: left;

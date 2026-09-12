@@ -29,9 +29,50 @@
     </header>
 
     <main>
+        <h2>Registro y cierre de sesión</h2>           
         <section>
-            <h2>Registro y cierre de sesión</h2>
-            <p>Vista en desarrollo.</p>
+            <h3>Iniciar Nueva Sesión</h3>
+            <form id="inicio-sesion">
+            <div>
+                <label for="select-cliente">Cliente:</label>
+                <select id="select-cliente" required>
+                    <option value="">Selecciona un cliente</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="select-computador">Computador:</label>
+                <select id="select-computador" required>
+                    <option value="">Selecciona un computador</option>
+                </select>
+            </div>
+
+            <button type="submit">Iniciar Sesión</button>
+            </form>
+        </section>
+        <section>
+            <h3>Finalizar Sesión</h3>
+            <form id="cierre-sesion">
+                <div>
+                    <label for="costos-adicionales">Costos Extras ($):</label>
+                    <input type="number" id="costos-adicionales" min="0" value="0" placeholder="0">
+                </div>
+
+                <button type="button" id="btn-finalizar">Finalizar y Cobrar</button>
+            </form>
+        </section>
+        <section>
+            <h3>Resumen de Cobro</h3>
+            <div id="detalle-resumen">
+                <p><strong>Cliente:</strong> <span id="resumen-cliente">-</span></p>
+                <p><strong>Computador:</strong> <span id="resumen-computador">-</span></p>
+                <p><strong>Hora Inicio:</strong> <span id="resumen-inicio">-</span></p>
+                <p><strong>Hora Termino:</strong> <span id="resumen-termino">-</span></p>
+                <p><strong>Tiempo Total:</strong> <span id="resumen-duracion">-</span></p>
+                <p><strong>Costo tiempo:</strong> <span id="resumen-costo-tiempo">0</span></p>
+                <p><strong>Costos Extras:</strong> <span id="resumen-costo-extra">0</span></p>
+                <p><strong>Total a pagar:</strong> <span id="resumen-monto-final">0</span></p>
+            </div>
         </section>
     </main>
 

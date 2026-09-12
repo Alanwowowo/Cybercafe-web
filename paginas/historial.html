@@ -29,9 +29,41 @@
     </header>
 
     <main>
+        <h2>Historial de sesiones</h2>
         <section>
-            <h2>Historial de sesiones</h2>
-            <p>Vista en desarrollo.</p>
+            <h3>Filtrar Registros</h3>
+            <div id="filtros-historial">
+                <div>
+                    <label for="filtro-cliente">Buscar por Cliente:</label>
+                    <input type="text" id="filtro-cliente" placeholder="Nombre o RUT">
+                </div>
+
+                <div>
+                    <label for="filtro-equipo">Buscar por Equipo:</label>
+                    <input type="text" id="filtro-equipo" placeholder="PC-XX">
+                </div>
+                
+                <div>
+                    <label for="filtro-fecha">Buscar por Fecha:</label>
+                    <input type="date" id="filtro-fecha">
+                </div>
+            </div>
+        </section>
+        <section>
+            <h3>Sesiones Anteriores</h3>
+            <table id="tabla-historial">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Computador</th>
+                        <th>Fecha</th>
+                        <th>Duración</th>
+                        <th>Monto Pagado</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-body-historial">
+                </tbody>
+            </table>
         </section>
     </main>
 
