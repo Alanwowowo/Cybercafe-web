@@ -16,11 +16,13 @@ if (formularioLogin) {
             correoIngresado === "admin@cybernet.com" &&
             contrasenaIngresada === "admin123"
         ) {
+            localStorage.setItem("rol-cybernet", "administrador");
             window.location.href = "paginas/inicio-admin.html";
         } else if (
             correoIngresado === "elianny.ortega@cybernet.com" &&
             contrasenaIngresada === "encargado123"
         ) {
+            localStorage.setItem("rol-cybernet", "encargado");
             window.location.href = "paginas/inicio-encargado.html";
         } else {
             alert("Correo o contraseña incorrectos.");
