@@ -14,42 +14,29 @@
 <body>
     <header>
         <h1>CyberNet</h1>
-        <nav>
-            <ul>
-                <li><a href="paginas/gestion-clientes.html">Gestión de clientes</a></li>
-                <li><a href="paginas/gestion-computadores.html">Gestión de computadores</a></li>
-                <li><a href="paginas/gestion-cuentas.html">Gestión de cuentas</a></li>
-                <li><a href="paginas/historial.html">Historial de sesiones</a></li>
-                <li><a href="paginas/inicio-admin.html">Inicio del administrador</a></li>
-                <li><a href="paginas/inicio-encargado.html">Inicio del encargado</a></li>
-                <li><a href="paginas/mapa-equipos.html">Mapa de equipos</a></li>
-                <li><a href="paginas/sesion.html">Registro y cierre de sesión</a></li>
-            </ul>
-        </nav>
-        <p>Sistema de gestión del cibercafé</p>
+        <h4>Sistema de gestión del cibercafé</h4>
     </header>
 
     <main>
         <section>
             <h2>Bienvenido</h2>
-            <p>Interfaz web en desarrollo.</p>
         </section>
         <div class="login-card">
             
-            <h1>Inicio Sesion</h1>
+            <h2>Inicio Sesion</h2>
             <form id="form-login" action="" method="post">
             
-            <div class="form-grupo">    
+            <div class="form-group">    
             <label for="correo">Correo electronico:</label>
-            <input type="email" id="correo" name="correo">
+            <input type="email" id="correo" name="correo" required>
             </div>
             
-            <div class="form-grupo">
+            <div class="form-group">
             <label for="password">Contraseña: </label>
             <input type="password" id="password" name="password" required>
             </div>
 
-            <button type="submit" class="button-login">Inciar Sesion</button>
+            <button type="submit" class="button-login">Iniciar Sesion</button>
             </form>
         </div>
     </main>

@@ -17,8 +17,6 @@
         align-items: center;
         text-align: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        transition: transform 0.25s ease, border-color 0.25s ease, box-shadow
-  0.25s ease;
     }
 
   .tarjeta-metrica h3 {
@@ -53,7 +51,6 @@
         margin: 0;
         color: #f5f5f5;
         font-size: 1.15rem;
-        transition: color 0.2s ease;
     }
 
         .contenedor-admin {
@@ -87,13 +84,10 @@
         padding: 22px 20px;
         text-decoration: none;              
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        transition: transform 0.25s ease, background-color 0.25s ease, box-
-  shadow 0.25s ease;
     }
 
     .tarjeta-admin h3 {
         margin: 0 0 8px 0;
         font-size: 1.15rem;
         color: #f5f5f5;
-        transition: color 0.2s ease;
     }
