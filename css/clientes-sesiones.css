@@ -47,6 +47,16 @@ input[type="text"]::placeholder, input[type="email"]::placeholder, input[type="n
     color: #6b6b80;
 }
 
+/* Formato gris placeholder para el texto dd - mm - aaaa en inputs de fecha */
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+    color: #6b6b80;
+}
+
 input:focus, select:focus{
     border-color: #8b5cf6;
     box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
