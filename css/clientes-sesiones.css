@@ -43,7 +43,7 @@ input[type="text"], input[type="email"], input[type="number"], input[type="date"
     color-scheme: dark;
 }
 
-input[type="text"]::placeholder, input[type="email"]::placeholder, input[type="number"]::placeholder, input[type="date"]{
+input[type="text"]::placeholder, input[type="email"]::placeholder, input[type="number"]::placeholder, input[type="date"]::placeholder{
     color: #6b6b80;
 }
 
@@ -125,7 +125,7 @@ button:hover, .btn-primario:hover{
 #detalle-resumen p{
     margin: 0;
     color: #b8b8c7;
-    font-size: 0,95rem;
+    font-size: 0.95rem;
 }
 
 #detalle-resumen p span{
@@ -135,7 +135,7 @@ button:hover, .btn-primario:hover{
 
 #detalle-resumen p:last-child{
     grid-column: 1 / -1;
-    font-size: 1,15rem;
+    font-size: 1.15rem;
     color: #c4b5fd;
     border-top: 1px solid #3f3f5a;
     padding-top: 12px;
