@@ -70,6 +70,14 @@ const totalHistorial = document.getElementById(
     "admin-total-historial"
 );
 
+if (totalComputadores) {
+    totalComputadores.textContent = "6 equipos registrados";
+}
+
+if (totalCuentas) {
+    totalCuentas.textContent = "3 cuentas registradas";
+}
+
 if (totalClientes) {
     totalClientes.textContent = "3 clientes registrados";
 }
