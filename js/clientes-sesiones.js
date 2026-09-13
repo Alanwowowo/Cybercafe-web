@@ -1,18 +1,34 @@
-let clientes = JSON.parse(localStorage.getItem("cybernet_clientes")) || [
-    {id: "12345678-9", nombre: "Jorge Gonzalez", correo: "Jorge@ejemplo.com"},
-    {id: "98765432-1", nombre: "Alvaro Herreros", correo: "Alvaro@ejemplo.com"},
-    {id: "32323345-5", nombre: "Pablo Paez", correo: "Gavi@ejemplo.com"}
+let clientes =[
+    {id: "12345678-9", nombre: "Jorge Gonzalez", correo: "jorge@ejemplo.com"},
+    {id: "98765432-1", nombre: "Alvaro Herreros", correo: "alvaro@ejemplo.com"},
+    {id: "32323345-5", nombre: "Pablo Paez", correo: "pablo@ejemplo.com"}
 ];
 
-let computadores = ["PC 01", "PC 02", "PC 03", "PC 04", "PC 05", "PC 06"];
+let computadores =["PC 01", "PC 02", "PC 03", "PC 04", "PC 05", "PC 06"];
 
-let historial = JSON.parse(localStorage.getItem("cybernet_historial")) || [
+let historial =[
     {cliente: "Jorge Gonzalez", computador: "PC 01", fecha: "2024-04-15", duracion: "300 min", monto: 10000},
     {cliente: "Pablo Paez", computador: "PC 06", fecha: "2021-08-29", duracion: "67 min", monto: 2500}
 ];
 
-let sesionActiva = JSON.parse(localStorage.getItem("cybernet_sesion_activa")) || null;
+let sesionActiva = null;
 let posicionEdicion = -1;
+
+const clientesGuardados = localStorage.getItem("cybernet_clientes");
+const historialGuardado = localStorage.getItem("cybernet_historial");
+const sesionGuardada = localStorage.getItem("cybernet_sesion_activa");
+
+if (clientesGuardados){
+    clientes = JSON.parse(clientesGuardados);
+}
+
+if (historialGuardado){
+    historial = JSON.parse(historialGuardado);
+}
+
+if (sesionGuardada){
+    sesionActiva = JSON.parse(sesionGuardada);
+}
 
 function guardarClientes(){
     localStorage.setItem("cybernet_clientes", JSON.stringify(clientes));
@@ -22,261 +38,350 @@ function guardarHistorial(){
     localStorage.setItem("cybernet_historial", JSON.stringify(historial));
 }
 
-const selectCliente = document.getElementById("select-cliente");
-const selectPC = document.getElementById("select-computador");
+const formularioCliente = document.getElementById("form-cliente");
+const tablaClientes = document.getElementById("tabla-clientes");
+const buscadorClientes = document.getElementById("buscar-cliente");
 
-function cargarSelectClientes(){
-    if (selectCliente){
-        selectCliente.innerHTML = '<option value="">Selecciona un cliente</option>';
-        for (let i = 0; i < clientes.length; i++){
-            selectCliente.innerHTML += `<option value="${clientes[i].nombre}">${clientes[i].nombre}</option>`;
-        }
+function mostrarClientes(lista){
+    if (!tablaClientes){
+        return;
+    }
+
+    const cuerpoTabla = tablaClientes.querySelector("tbody");
+    cuerpoTabla.textContent = "";
+
+    for (let i = 0; i < lista.length; i++){
+        const cliente = lista[i];
+        const fila = cuerpoTabla.insertRow();
+
+        const celdaId = fila.insertCell();
+        const celdaNombre = fila.insertCell();
+        const celdaCorreo = fila.insertCell();
+        const celdaAcciones = fila.insertCell();
+
+        celdaId.textContent = cliente.id;
+        celdaNombre.textContent = cliente.nombre;
+        celdaCorreo.textContent = cliente.correo;
+
+        const botonEditar = document.createElement("button");
+        botonEditar.type = "button";
+        botonEditar.textContent = "Editar";
+        botonEditar.classList.add("btn-accion-editar");
+        botonEditar.dataset.idCliente = cliente.id;
+
+        celdaAcciones.appendChild(botonEditar);
     }
 }
 
-const formCliente = document.getElementById("form-cliente");
-const tablaClientes = document.getElementById("tabla-clientes");
+if (tablaClientes){
+    mostrarClientes(clientes);
 
-if (formCliente && tablaClientes){
-    const tbody = tablaClientes.querySelector("tbody");
+    tablaClientes.addEventListener("click", function (evento){
+        const elementoPresionado = evento.target;
 
-    function cargarTablaClientes(lista){
-        if (!lista){
-            lista = clientes;
+        if (elementoPresionado.classList.contains("btn-accion-editar")){
+            const idCliente = elementoPresionado.dataset.idCliente;
+
+            for (let i = 0; i < clientes.length; i++){
+                if (clientes[i].id === idCliente) {
+                    document.getElementById("id-cliente").value = clientes[i].id;
+                    document.getElementById("nombre-cliente").value = clientes[i].nombre;
+                    document.getElementById("correo-cliente").value = clientes[i].correo;
+
+                    posicionEdicion = i;
+                    break;
+                }
+            }
         }
-        tbody.innerHTML = "";
-        for (let i = 0; i < lista.length; i++){
-            let c = lista[i];
-            tbody.innerHTML += `
-                <tr>
-                    <td>${c.id}</td>
-                    <td>${c.nombre}</td>
-                    <td>${c.correo}</td>
-                    <td>
-                        <button class="btn-accion-editar" onclick="editarCliente('${c.id}')">Editar</button>
-                    </td>
-                </tr>
-            `;
-        }
-    }
+    });
+}
 
-    cargarTablaClientes();
+if (formularioCliente){
+    formularioCliente.addEventListener("submit", function (evento) {
+        evento.preventDefault();
 
-    formCliente.addEventListener("submit", function(e){
-        e.preventDefault();
-        let idVal = document.getElementById("id-cliente").value;
-        let nomVal = document.getElementById("nombre-cliente").value;
-        let correoVal = document.getElementById("correo-cliente").value;
+        const id = document.getElementById("id-cliente").value.trim();
+        const nombre = document.getElementById("nombre-cliente").value.trim();
+        const correo = document.getElementById("correo-cliente").value.trim();
+
+        const datosCliente ={
+            id: id,
+            nombre: nombre,
+            correo: correo
+        };
 
         if (posicionEdicion === -1){
-            clientes.push({id: idVal, nombre: nomVal, correo: correoVal});
+            clientes.push(datosCliente);
             alert("Cliente registrado correctamente.");
-        }else{
-            clientes[posicionEdicion] = {id: idVal, nombre: nomVal, correo: correoVal};
+        } else{
+            clientes[posicionEdicion] = datosCliente;
             posicionEdicion = -1;
             alert("Cliente actualizado correctamente.");
         }
-        
-        guardarClientes();
-        cargarTablaClientes();
-        cargarSelectClientes();
-        formCliente.reset();
-    });
 
-    window.editarCliente = function(clienteId){
+        guardarClientes();
+        mostrarClientes(clientes);
+        formularioCliente.reset();
+    });
+}
+
+if (buscadorClientes){
+    buscadorClientes.addEventListener("input", function (){
+        const texto = buscadorClientes.value.toLowerCase();
+        const clientesFiltrados =[];
+
         for (let i = 0; i < clientes.length; i++){
-            if (clientes[i].id === clienteId){
-                let c = clientes[i];
-                document.getElementById("id-cliente").value = c.id;
-                document.getElementById("nombre-cliente").value = c.nombre;
-                document.getElementById("correo-cliente").value = c.correo;
-                posicionEdicion = i;
-                break;
+            const cliente = clientes[i];
+
+            const coincideId = cliente.id.toLowerCase().includes(texto);
+            const coincideNombre = cliente.nombre.toLowerCase().includes(texto);
+            const coincideCorreo = cliente.correo.toLowerCase().includes(texto);
+
+            if (coincideId || coincideNombre || coincideCorreo){
+                clientesFiltrados.push(cliente);
             }
         }
-    };
 
-    const buscarInput = document.getElementById("buscar-cliente");
-    if (buscarInput){
-        buscarInput.addEventListener("keyup", function(){
-            let texto = buscarInput.value.toLowerCase();
-            let filtrados = [];
-            for (let i = 0; i < clientes.length; i++){
-                let c = clientes[i];
-                if (c.id.toLowerCase().includes(texto) || c.nombre.toLowerCase().includes(texto) || c.correo.toLowerCase().includes(texto)){
-                    filtrados.push(c);
-                }
-            }
-            cargarTablaClientes(filtrados);
-        });
+        mostrarClientes(clientesFiltrados);
+    });
+}
+
+const selectorCliente = document.getElementById("select-cliente");
+const selectorComputador = document.getElementById("select-computador");
+
+function cargarClientesEnSelect(){
+    if (!selectorCliente){
+        return;
+    }
+
+    selectorCliente.textContent = "";
+
+    const opcionInicial = document.createElement("option");
+    opcionInicial.value = "";
+    opcionInicial.textContent = "Selecciona un cliente";
+    selectorCliente.appendChild(opcionInicial);
+
+    for (let i = 0; i < clientes.length; i++){
+        const opcion = document.createElement("option");
+        opcion.value = clientes[i].nombre;
+        opcion.textContent = clientes[i].nombre;
+        selectorCliente.appendChild(opcion);
     }
 }
 
-const formInicio = document.getElementById("inicio-sesion");
-if (formInicio){
-    cargarSelectClientes();
-
-    if (selectPC){
-        selectPC.innerHTML = '<option value="">Selecciona un computador</option>';
-        for (let i = 0; i < computadores.length; i++){
-            selectPC.innerHTML += `<option value="${computadores[i]}">${computadores[i]}</option>`;
-        }
+function cargarComputadoresEnSelect(){
+    if (!selectorComputador){
+        return;
     }
 
-    function actualizarEstadoSesionUI(){
-        if (sesionActiva){
-            let horaInicio = new Date(sesionActiva.inicioTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            let resCliente = document.getElementById("resumen-cliente");
-            if (resCliente){
-                resCliente.innerText = sesionActiva.cliente;
-                document.getElementById("resumen-computador").innerText = sesionActiva.computador;
-                document.getElementById("resumen-inicio").innerText = horaInicio;
-                document.getElementById("resumen-termino").innerText = "En curso...";
-                document.getElementById("resumen-duracion").innerText = "En curso...";
-                document.getElementById("resumen-costo-tiempo").innerText = "$0";
-                document.getElementById("resumen-costo-extra").innerText = "$0";
-                document.getElementById("resumen-monto-final").innerText = "$0";
-            }
-        }
+    selectorComputador.textContent = "";
+
+    const opcionInicial = document.createElement("option");
+    opcionInicial.value = "";
+    opcionInicial.textContent = "Selecciona un computador";
+    selectorComputador.appendChild(opcionInicial);
+
+    for (let i = 0; i < computadores.length; i++){
+        const opcion = document.createElement("option");
+        opcion.value = computadores[i];
+        opcion.textContent = computadores[i];
+        selectorComputador.appendChild(opcion);
+    }
+}
+
+function obtenerFecha(fecha){
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+    const dia = String(fecha.getDate()).padStart(2, "0");
+
+    return anio + "-" + mes + "-" + dia;
+}
+
+function obtenerHora(milisegundos){
+    const fecha = new Date(milisegundos);
+    const hora = String(fecha.getHours()).padStart(2, "0");
+    const minutos = String(fecha.getMinutes()).padStart(2, "0");
+
+    return hora + ":" + minutos;
+}
+
+const formularioInicio = document.getElementById("inicio-sesion");
+const botonFinalizar = document.getElementById("btn-finalizar");
+
+function mostrarSesionActiva(){
+    if (!sesionActiva){
+        return;
     }
 
-    actualizarEstadoSesionUI();
+    const resumenCliente = document.getElementById("resumen-cliente");
 
-    formInicio.addEventListener("submit", function(e){
-        e.preventDefault();
+    if (resumenCliente){
+        resumenCliente.textContent = sesionActiva.cliente;
+        document.getElementById("resumen-computador").textContent = sesionActiva.computador;
+        document.getElementById("resumen-inicio").textContent = obtenerHora(sesionActiva.horaInicio);
+        document.getElementById("resumen-termino").textContent = "En curso";
+        document.getElementById("resumen-duracion").textContent = "En curso";
+        document.getElementById("resumen-costo-tiempo").textContent = "$0";
+        document.getElementById("resumen-costo-extra").textContent = "$0";
+        document.getElementById("resumen-monto-final").textContent = "$0";
+    }
+}
+
+if (formularioInicio){
+    cargarClientesEnSelect();
+    cargarComputadoresEnSelect();
+    mostrarSesionActiva();
+
+    formularioInicio.addEventListener("submit", function (evento) {
+        evento.preventDefault();
+
         if (sesionActiva){
-            alert("Ya existe una sesión activa con " + sesionActiva.cliente + " en " + sesionActiva.computador + ". Debes finalizarla primero.");
+            alert("Ya existe una sesión activa. Debes finalizarla primero.");
             return;
         }
-        if (selectCliente && selectPC){
-            let ahora = new Date();
-            sesionActiva = {
-                cliente: selectCliente.value,
-                computador: selectPC.value,
-                inicioTime: ahora.getTime(),
-                fechaStr: ahora.toISOString().split("T")[0]
-            };
-            localStorage.setItem("cybernet_sesion_activa", JSON.stringify(sesionActiva));
-            actualizarEstadoSesionUI();
-            alert("Sesión iniciada para " + sesionActiva.cliente + " en " + sesionActiva.computador);
-        }
+
+        const ahora = new Date();
+
+        sesionActiva ={
+            cliente: selectorCliente.value,
+            computador: selectorComputador.value,
+            horaInicio: ahora.getTime(),
+            fecha: obtenerFecha(ahora)
+        };
+
+        localStorage.setItem(
+            "cybernet_sesion_activa",
+            JSON.stringify(sesionActiva)
+        );
+
+        mostrarSesionActiva();
+
+        alert(
+            "Sesión iniciada para " +
+            sesionActiva.cliente +
+            " en " +
+            sesionActiva.computador
+        );
     });
+}
 
-    const btnFinalizar = document.getElementById("btn-finalizar");
-    if (btnFinalizar){
-        btnFinalizar.addEventListener("click", function(){
-            if (!sesionActiva){
-                alert("Primero debes seleccionar un cliente e iniciar sesión.");
-                return;
-            }
+if (botonFinalizar){
+    botonFinalizar.addEventListener("click", function () {
+        if (!sesionActiva){
+            alert("Primero debes iniciar una sesión.");
+            return;
+        }
 
-            let confirmar = confirm("¿Deseas finalizar la sesión de " + sesionActiva.cliente + "?");
-            if (confirmar){
-                let extrasInput = document.getElementById("costos-adicionales");
-                let extras = 0;
-                if (extrasInput && extrasInput.value){
-                    extras = parseInt(extrasInput.value);
-                }
+        const confirmarFinalizacion = confirm(
+            "¿Deseas finalizar la sesión de " + sesionActiva.cliente + "?"
+        );
 
-                let finTime = new Date().getTime();
-                let diffMin = Math.round((finTime - sesionActiva.inicioTime) / 60000);
-                if (diffMin < 1){
-                    diffMin = 1;
-                }
+        if (!confirmarFinalizacion){
+            return;
+        }
 
-                let tarifaPorMinuto = 25;
-                let costoTiempo = diffMin * tarifaPorMinuto;
-                let total = costoTiempo + extras;
+        const campoExtras = document.getElementById("costos-adicionales");
+        let costosExtras = parseInt(campoExtras.value);
 
-                let horaInicioFormato = new Date(sesionActiva.inicioTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                let horaFinFormato = new Date(finTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        if (isNaN(costosExtras)){
+            costosExtras = 0;
+        }
 
-                document.getElementById("resumen-cliente").innerText = sesionActiva.cliente;
-                document.getElementById("resumen-computador").innerText = sesionActiva.computador;
-                document.getElementById("resumen-inicio").innerText = horaInicioFormato;
-                document.getElementById("resumen-termino").innerText = horaFinFormato;
-                document.getElementById("resumen-duracion").innerText = diffMin + " min";
-                document.getElementById("resumen-costo-tiempo").innerText = "$" + costoTiempo;
-                document.getElementById("resumen-costo-extra").innerText = "$" + extras;
-                document.getElementById("resumen-monto-final").innerText = "$" + total;
+        const horaTermino = new Date().getTime();
+        let duracion = Math.ceil(
+            (horaTermino - sesionActiva.horaInicio) / 60000
+        );
 
-                historial.push({
-                    cliente: sesionActiva.cliente,
-                    computador: sesionActiva.computador,
-                    fecha: sesionActiva.fechaStr,
-                    duracion: diffMin + " min",
-                    monto: total
-                });
+        if (duracion < 1){
+            duracion = 1;
+        }
 
-                guardarHistorial();
-                localStorage.removeItem("cybernet_sesion_activa");
-                sesionActiva = null;
+        const tarifaPorMinuto = 25;
+        const costoTiempo = duracion * tarifaPorMinuto;
+        const montoFinal = costoTiempo + costosExtras;
 
-                if (extrasInput){
-                    extrasInput.value = "0";
-                }
-            }
-        });
+        document.getElementById("resumen-cliente").textContent = sesionActiva.cliente;
+        document.getElementById("resumen-computador").textContent = sesionActiva.computador;
+        document.getElementById("resumen-inicio").textContent = obtenerHora(sesionActiva.horaInicio);
+        document.getElementById("resumen-termino").textContent = obtenerHora(horaTermino);
+        document.getElementById("resumen-duracion").textContent = duracion + " min";
+        document.getElementById("resumen-costo-tiempo").textContent = "$" + costoTiempo;
+        document.getElementById("resumen-costo-extra").textContent = "$" + costosExtras;
+        document.getElementById("resumen-monto-final").textContent = "$" + montoFinal;
+
+        const nuevaSesion ={
+            cliente: sesionActiva.cliente,
+            computador: sesionActiva.computador,
+            fecha: sesionActiva.fecha,
+            duracion: duracion + " min",
+            monto: montoFinal
+        };
+
+        historial.push(nuevaSesion);
+        guardarHistorial();
+
+        localStorage.removeItem("cybernet_sesion_activa");
+        sesionActiva = null;
+        campoExtras.value = "0";
+    });
+}
+
+const cuerpoHistorial = document.getElementById("tabla-body-historial");
+const filtroCliente = document.getElementById("filtro-cliente");
+const filtroEquipo = document.getElementById("filtro-equipo");
+const filtroFecha = document.getElementById("filtro-fecha");
+
+function mostrarHistorial(lista){
+    if (!cuerpoHistorial){
+        return;
+    }
+
+    cuerpoHistorial.textContent = "";
+
+    for (let i = 0; i < lista.length; i++){
+        const sesion = lista[i];
+        const fila = cuerpoHistorial.insertRow();
+
+        fila.insertCell().textContent = sesion.cliente;
+        fila.insertCell().textContent = sesion.computador;
+        fila.insertCell().textContent = sesion.fecha;
+        fila.insertCell().textContent = sesion.duracion;
+        fila.insertCell().textContent = "$" + sesion.monto;
     }
 }
 
-const tbodyHistorial = document.getElementById("tabla-body-historial");
+function aplicarFiltrosHistorial(){
+    const sesionesFiltradas = [];
+    const clienteBuscado = filtroCliente.value.toLowerCase();
+    const equipoBuscado = filtroEquipo.value.toLowerCase();
+    const fechaBuscada = filtroFecha.value;
 
-function renderHistorial(lista){
-    if (!lista){
-        lista = historial;
-    }
-    if (tbodyHistorial){
-        tbodyHistorial.innerHTML = "";
-        for (let i = 0; i < lista.length; i++){
-            let h = lista[i];
-            tbodyHistorial.innerHTML += `
-                <tr>
-                    <td>${h.cliente}</td>
-                    <td>${h.computador}</td>
-                    <td>${h.fecha}</td>
-                    <td>${h.duracion}</td>
-                    <td>$${h.monto}</td>
-                </tr>
-            `;
+    for (let i = 0; i < historial.length; i++){
+        const sesion = historial[i];
+
+        const coincideCliente = sesion.cliente
+            .toLowerCase()
+            .includes(clienteBuscado);
+
+        const coincideEquipo = sesion.computador
+            .toLowerCase()
+            .includes(equipoBuscado);
+
+        const coincideFecha =
+            fechaBuscada === "" || sesion.fecha === fechaBuscada;
+
+        if (coincideCliente && coincideEquipo && coincideFecha){
+            sesionesFiltradas.push(sesion);
         }
     }
+
+    mostrarHistorial(sesionesFiltradas);
 }
 
-if (tbodyHistorial){
-    renderHistorial();
+if (cuerpoHistorial){
+    mostrarHistorial(historial);
 
-    const filtroCliente = document.getElementById("filtro-cliente");
-    const filtroEquipo = document.getElementById("filtro-equipo");
-    const filtroFecha = document.getElementById("filtro-fecha");
-
-    function aplicarFiltros(){
-        let valCliente = filtroCliente ? filtroCliente.value.toLowerCase() : "";
-        let valEquipo = filtroEquipo ? filtroEquipo.value.toLowerCase() : "";
-        let valFecha = filtroFecha ? filtroFecha.value : "";
-
-        let filtrados = [];
-        for (let i = 0; i < historial.length; i++){
-            let h = historial[i];
-            let coincideCliente = h.cliente.toLowerCase().includes(valCliente);
-            let coincideEquipo = h.computador.toLowerCase().includes(valEquipo);
-            let coincideFecha = (valFecha === "") || (h.fecha === valFecha);
-
-            if (coincideCliente && coincideEquipo && coincideFecha){
-                filtrados.push(h);
-            }
-        }
-
-        renderHistorial(filtrados);
-    }
-
-    if (filtroCliente){
-        filtroCliente.addEventListener("keyup", aplicarFiltros);
-    }
-    if (filtroEquipo){
-        filtroEquipo.addEventListener("keyup", aplicarFiltros);
-    }
-    if (filtroFecha){
-        filtroFecha.addEventListener("change", aplicarFiltros);
-    }
+    filtroCliente.addEventListener("input", aplicarFiltrosHistorial);
+    filtroEquipo.addEventListener("input", aplicarFiltrosHistorial);
+    filtroFecha.addEventListener("change", aplicarFiltrosHistorial);
 }
