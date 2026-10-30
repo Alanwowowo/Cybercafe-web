@@ -16,11 +16,13 @@ if (formularioLogin) {
             correoIngresado === "admin@cybernet.com" &&
             contrasenaIngresada === "admin123"
         ) {
+            sessionStorage.setItem("rol", "administrador");
             window.location.href = "paginas/inicio-admin.html";
         } else if (
             correoIngresado === "elianny.ortega@cybernet.com" &&
             contrasenaIngresada === "encargado123"
         ) {
+            sessionStorage.setItem("rol", "encargado");
             window.location.href = "paginas/inicio-encargado.html";
         } else {
             alert("Correo o contraseña incorrectos.");
@@ -68,4 +70,31 @@ if (totalComputadores) {
 
 if (totalCuentas) {
     totalCuentas.textContent = "3 cuentas registradas";
+}
+
+// Control de acceso del administrador
+if (window.location.pathname.endsWith("/inicio-admin.html")) {
+    const rol = sessionStorage.getItem("rol");
+
+    if (rol !== "administrador") {
+        window.location.replace("../index.html");
+    }
+}
+
+// Control de acceso del encargado
+if (window.location.pathname.endsWith("/inicio-encargado.html")) {
+    const rol = sessionStorage.getItem("rol");
+
+    if (rol !== "encargado") {
+        window.location.replace("../index.html");
+    }
+}
+
+// Cierre de sesión
+const botonCerrarSesion = document.getElementById("cerrar-sesion");
+
+if (botonCerrarSesion) {
+    botonCerrarSesion.addEventListener("click", function () {
+        sessionStorage.removeItem("rol");
+    });
 }
