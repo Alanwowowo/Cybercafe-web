@@ -64,12 +64,28 @@ const totalComputadores = document.getElementById(
 
 const totalCuentas = document.getElementById("admin-total-cuentas");
 
+const totalClientes = document.getElementById(
+    "admin-total-clientes"
+);
+
+const totalHistorial = document.getElementById(
+    "admin-total-historial"
+);
+
 if (totalComputadores) {
     totalComputadores.textContent = "6 equipos registrados";
 }
 
 if (totalCuentas) {
     totalCuentas.textContent = "3 cuentas registradas";
+}
+
+if (totalClientes) {
+    totalClientes.textContent = "3 clientes registrados";
+}
+
+if (totalHistorial) {
+    totalHistorial.textContent = "2 registros";
 }
 
 // Control de acceso del administrador

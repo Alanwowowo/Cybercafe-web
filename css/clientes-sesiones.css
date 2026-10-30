@@ -179,3 +179,11 @@ table td {
 table tbody tr:hover {
     background-color: #232334;
 }
+
+.contenedor-tabla-clientes {
+    overflow-x: auto;
+}
+
+.contenedor-tabla-clientes table {
+    min-width: 600px;
+}
