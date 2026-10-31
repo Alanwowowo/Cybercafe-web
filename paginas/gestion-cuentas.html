@@ -68,7 +68,7 @@
                 </button>
             </div>
 
-            <form class="formulario-cuenta" x-show="formularioVisible" @submit.prevent="guardarCuenta()">
+            <form class="formulario-cuenta" x-cloak x-show="formularioVisible" @submit.prevent="guardarCuenta()">
                 <h3 x-text="idEdicion === null ? 'Agregar cuenta' : 'Editar cuenta'"></h3>
 
                 <div class="campo-formulario">
@@ -100,7 +100,9 @@
                 </div>
 
                 <div class="acciones-formulario">
-                    <button type="submit" class="boton-guardar">Guardar</button>
+                    <button type="submit" class="boton-guardar">
+                        <span x-text="idEdicion === null ? 'Guardar' : 'Actualizar'"></span>
+                    </button>
                     <button type="button" class="boton-cancelar" @click="cancelarFormulario()">
                         Cancelar
                     </button>
