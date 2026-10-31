@@ -1,44 +1,3 @@
-function obtenerComputadoresIniciales() {
-    return [
-        {
-            id: 1,
-            nombre: "PC 01",
-            estado: "disponible",
-            ubicacion: "Sala principal"
-        },
-        {
-            id: 2,
-            nombre: "PC 02",
-            estado: "ocupado",
-            ubicacion: "Sala principal"
-        },
-        {
-            id: 3,
-            nombre: "PC 03",
-            estado: "disponible",
-            ubicacion: "Sala principal"
-        },
-        {
-            id: 4,
-            nombre: "PC 04",
-            estado: "fuera-servicio",
-            ubicacion: "Sala secundaria"
-        },
-        {
-            id: 5,
-            nombre: "PC 05",
-            estado: "ocupado",
-            ubicacion: "Sala secundaria"
-        },
-        {
-            id: 6,
-            nombre: "PC 06",
-            estado: "disponible",
-            ubicacion: "Sala secundaria"
-        }
-    ];
-}
-
 /* Mapa de equipos */
 function gestionMapaEquipos() {
     return {
@@ -105,6 +64,47 @@ function gestionMapaEquipos() {
 }
 
 /* Gestión de computadores */
+function obtenerComputadoresIniciales() {
+    return [
+        {
+            id: 1,
+            nombre: "PC 01",
+            estado: "disponible",
+            ubicacion: "Sala principal"
+        },
+        {
+            id: 2,
+            nombre: "PC 02",
+            estado: "ocupado",
+            ubicacion: "Sala principal"
+        },
+        {
+            id: 3,
+            nombre: "PC 03",
+            estado: "disponible",
+            ubicacion: "Sala principal"
+        },
+        {
+            id: 4,
+            nombre: "PC 04",
+            estado: "fuera-servicio",
+            ubicacion: "Sala secundaria"
+        },
+        {
+            id: 5,
+            nombre: "PC 05",
+            estado: "ocupado",
+            ubicacion: "Sala secundaria"
+        },
+        {
+            id: 6,
+            nombre: "PC 06",
+            estado: "disponible",
+            ubicacion: "Sala secundaria"
+        }
+    ];
+}
+
 function gestionComputadores() {
     return {
         computadores: [],
@@ -304,200 +304,205 @@ function gestionComputadores() {
 }
 
 /* Gestión de cuentas */
-const botonAgregarCuenta = document.getElementById(
-    "boton-agregar-cuenta"
-)
-
-const formularioCuenta = document.getElementById(
-    "formulario-cuenta"
-)
-
-const botonCancelarCuenta = document.getElementById(
-    "boton-cancelar-cuenta"
-)
-
-if (botonAgregarCuenta && formularioCuenta && botonCancelarCuenta) {
-    botonAgregarCuenta.addEventListener("click", function () {
-        formularioCuenta.classList.remove("oculto");
-    });
-
-    botonCancelarCuenta.addEventListener("click", function () {
-        formularioCuenta.classList.add("oculto");
-        formularioCuenta.reset();
-    });
+function obtenerCuentasIniciales() {
+    return [
+        {
+            id: 1,
+            nombre: "Jaimito Rios",
+            correo: "admin@cybernet.com",
+            rol: "Administrador",
+            estado: "activa"
+        },
+        {
+            id: 2,
+            nombre: "Elianny Ortega",
+            correo: "elianny.ortega@cybernet.com",
+            rol: "Encargado",
+            estado: "activa"
+        },
+        {
+            id: 3,
+            nombre: "Roberto Carlos",
+            correo: "roberto.carlos@cybernet.com",
+            rol: "Encargado",
+            estado: "inactiva"
+        }
+    ];
 }
 
-const nombreCuenta = document.getElementById("nombre-cuenta");
-const correoCuenta = document.getElementById("correo-cuenta");
-const rolCuenta = document.getElementById("rol-cuenta");
-const estadoCuenta = document.getElementById("estado-cuenta");
-const listaCuentas = document.getElementById("lista-cuentas");
+function gestionCuentas() {
+    return {
+        cuentas: [],
+        formularioVisible: false,
+        idEdicion: null,
 
-if (
-    formularioCuenta &&
-    nombreCuenta &&
-    correoCuenta &&
-    rolCuenta &&
-    estadoCuenta &&
-    listaCuentas
-) {
-    formularioCuenta.addEventListener("submit", function (evento) {
-        evento.preventDefault();
+        nombre: "",
+        correo: "",
+        rol: "Encargado",
+        estado: "activa",
+        busqueda: "",
+        filtroRol: "todos",
+        filtroEstado: "todos",
+        orden: "nombre-asc",
 
-        const nombre = nombreCuenta.value.trim();
-        const correo = correoCuenta.value.trim();
-        const rol = rolCuenta.value;
-        const estado = estadoCuenta.value;
+        iniciar() {
+            const guardadas = localStorage.getItem("cybernet_cuentas");
 
-        let textoEstado = "Activa";
-        let claseEstado = "punto-activa";
-
-        if (estado === "inactiva") {
-            textoEstado = "Inactiva";
-            claseEstado = "punto-inactiva";
-        }
-
-        const nuevaFila = listaCuentas.insertRow();
-
-        const celdaNombre = nuevaFila.insertCell();
-        const celdaCorreo = nuevaFila.insertCell();
-        const celdaRol = nuevaFila.insertCell();
-        const celdaEstado = nuevaFila.insertCell();
-        const celdaAcciones = nuevaFila.insertCell();
-
-        celdaNombre.textContent = nombre;
-        celdaCorreo.textContent = correo;
-        celdaRol.textContent = rol;
-
-        const puntoEstado = document.createElement("span");
-        puntoEstado.classList.add("punto-estado", claseEstado);
-
-        celdaEstado.appendChild(puntoEstado);
-        celdaEstado.append(" " + textoEstado);
-        
-        const botonEditar = document.createElement("button");
-        botonEditar.type = "button";
-        botonEditar.textContent = "Editar";
-        botonEditar.classList.add("boton-editar-cuenta");
-
-        const botonEliminar = document.createElement("button");
-        botonEliminar.type = "button";
-        botonEliminar.textContent = "Eliminar";
-        botonEliminar.classList.add("boton-eliminar-cuenta");
-
-        celdaAcciones.appendChild(botonEditar);
-        celdaAcciones.append(" ");
-        celdaAcciones.appendChild(botonEliminar);
-
-        formularioCuenta.reset();
-        formularioCuenta.classList.add("oculto");
-    });
-}   
-
-if (listaCuentas) {
-    listaCuentas.addEventListener("click", function (evento) {
-        const elementoPresionado = evento.target;
-        const filaCuenta = elementoPresionado.closest("tr");
-
-        if (!filaCuenta) {
-            return;
-        }
-
-        if (
-            elementoPresionado.classList.contains(
-                "boton-eliminar-cuenta"
-            )
-        ) {
-            const nombreUsuario = filaCuenta.cells[0].textContent;
-
-            const confirmarEliminacion = confirm(
-                "¿Deseas eliminar la cuenta de " + nombreUsuario + "?"
-            );
-
-            if (confirmarEliminacion) {
-                filaCuenta.remove();
+            if (guardadas) {
+                this.cuentas = JSON.parse(guardadas);
+            } else {
+                this.cuentas = obtenerCuentasIniciales();
+                this.guardarEnStorage();
             }
-        }
+        },
 
-        if (
-            elementoPresionado.classList.contains(
-                "boton-editar-cuenta"
-            )
-        ) {
-            const nombreActual = filaCuenta.cells[0].textContent;
-            const correoActual = filaCuenta.cells[1].textContent;
-            const rolActual = filaCuenta.cells[2].textContent;
-
-            const puntoEstado = filaCuenta.querySelector(".punto-estado");
-
-            let estadoActual = "activa";
-
-            if (puntoEstado.classList.contains("punto-inactiva")) {
-                estadoActual = "inactiva";
-            }
-
-            const nuevoNombre = prompt(
-                "Nombre del usuario:",
-                nombreActual
+        guardarEnStorage() {
+            localStorage.setItem(
+                "cybernet_cuentas",
+                JSON.stringify(this.cuentas)
             );
+        },
 
-            if (nuevoNombre === null || nuevoNombre.trim() === "") {
+        abrirFormulario() {
+            this.idEdicion = null;
+            this.nombre = "";
+            this.correo = "";
+            this.rol = "Encargado";
+            this.estado = "activa";
+            this.formularioVisible = true;
+        },
+
+        cancelarFormulario() {
+            this.formularioVisible = false;
+            this.idEdicion = null;
+            this.nombre = "";
+            this.correo = "";
+            this.rol = "Encargado";
+            this.estado = "activa";
+        },
+
+        guardarCuenta() {
+            const nombreLimpio = this.nombre.trim();
+            const correoLimpio = this.correo.trim().toLowerCase();
+
+            if (nombreLimpio === "" || correoLimpio === "") {
+                alert("Debes completar el nombre y el correo.");
                 return;
             }
 
-            const nuevoCorreo = prompt(
-                "Correo electrónico:",
-                correoActual
+            const correoRepetido = this.cuentas.some((cuenta) =>
+                cuenta.correo.toLowerCase() === correoLimpio &&
+                cuenta.id !== this.idEdicion
             );
 
-            if (nuevoCorreo === null || nuevoCorreo.trim() === "") {
+            if (correoRepetido) {
+                alert("Ya existe una cuenta con ese correo.");
                 return;
             }
 
-            const nuevoRol = prompt(
-                "Rol: Administrador o Encargado",
-                rolActual
-            );
+            if (this.idEdicion === null) {
+                this.cuentas.push({
+                    id: Date.now(),
+                    nombre: nombreLimpio,
+                    correo: correoLimpio,
+                    rol: this.rol,
+                    estado: this.estado
+                });
+            } else {
+                const indice = this.cuentas.findIndex(
+                    (cuenta) => cuenta.id === this.idEdicion
+                );
 
-            if (
-                nuevoRol !== "Administrador" &&
-                nuevoRol !== "Encargado"
-            ) {
-                alert("El rol ingresado no es válido.");
+                this.cuentas.splice(indice, 1, {
+                    id: this.idEdicion,
+                    nombre: nombreLimpio,
+                    correo: correoLimpio,
+                    rol: this.rol,
+                    estado: this.estado
+                });
+            }
+
+            this.guardarEnStorage();
+            this.cancelarFormulario();
+        },
+
+        editarCuenta(id) {
+            const cuenta = this.cuentas.find((cuenta) => cuenta.id === id);
+
+            if (!cuenta) {
                 return;
             }
 
-            const nuevoEstado = prompt(
-                "Estado: activa o inactiva",
-                estadoActual
-            );
+            this.idEdicion = cuenta.id;
+            this.nombre = cuenta.nombre;
+            this.correo = cuenta.correo;
+            this.rol = cuenta.rol;
+            this.estado = cuenta.estado;
+            this.formularioVisible = true;
+        },
 
-            if (
-                nuevoEstado !== "activa" &&
-                nuevoEstado !== "inactiva"
-            ) {
-                alert("El estado ingresado no es válido.");
+        eliminarCuenta(id) {
+            const cuenta = this.cuentas.find((cuenta) => cuenta.id === id);
+
+            if (!cuenta) {
                 return;
             }
 
-            let textoEstado = "Activa";
-            let claseEstado = "punto-activa";
+            const confirmar = confirm(
+                "¿Deseas eliminar la cuenta de " + cuenta.nombre + "?"
+            );
 
-            if (nuevoEstado === "inactiva") {
-                textoEstado = "Inactiva";
-                claseEstado = "punto-inactiva";
+            if (!confirmar) {
+                return;
             }
 
-            filaCuenta.cells[0].textContent = nuevoNombre.trim();
-            filaCuenta.cells[1].textContent = nuevoCorreo.trim();
-            filaCuenta.cells[2].textContent = nuevoRol;
+            this.cuentas = this.cuentas.filter(
+                (cuenta) => cuenta.id !== id
+            );
 
-            const celdaEstado = filaCuenta.cells[3];
+            this.guardarEnStorage();
+        },
 
-            celdaEstado.textContent = "";
-            puntoEstado.className = "punto-estado " + claseEstado;
-            celdaEstado.appendChild(puntoEstado);
-            celdaEstado.append(" " + textoEstado);
+        get cuentasVisibles() {
+            const texto = this.busqueda.trim().toLowerCase();
+
+            const resultado = this.cuentas.filter((cuenta) => {
+                const coincideTexto =
+                    cuenta.nombre.toLowerCase().includes(texto) ||
+                    cuenta.correo.toLowerCase().includes(texto);
+
+                const coincideRol =
+                    this.filtroRol === "todos" ||
+                    cuenta.rol === this.filtroRol;
+
+                const coincideEstado =
+                    this.filtroEstado === "todos" ||
+                    cuenta.estado === this.filtroEstado;
+
+                return coincideTexto && coincideRol && coincideEstado;
+            });
+
+            return resultado.sort((a, b) => {
+                if (this.orden === "nombre-desc") {
+                    return b.nombre.localeCompare(a.nombre);
+                }
+
+                if (this.orden === "correo") {
+                    return a.correo.localeCompare(b.correo);
+                }
+
+                return a.nombre.localeCompare(b.nombre);
+            });
+        },
+
+        textoEstado(estado) {
+            return estado === "activa" ? "Activa" : "Inactiva";
+        },
+
+        claseEstado(estado) {
+            return estado === "activa"
+                ? "punto-activa"
+                : "punto-inactiva";
         }
-    });
+    };
 }

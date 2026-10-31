@@ -56,44 +56,36 @@
         </header>
 
     <main>
-        <section class="seccion-gestion-cuentas">
+        <section class="seccion-gestion-cuentas" x-data="gestionCuentas()" x-init="iniciar()">
             <div class="encabezado-seccion">
                 <div>
                     <h2>Gestión de cuentas</h2>
                     <p>Administra las cuentas con acceso al sistema</p>
                 </div>
 
-                <button type="button" id="boton-agregar-cuenta">
+                <button type="button" id="boton-agregar-cuenta" @click="abrirFormulario()">
                     Agregar cuenta
                 </button>
             </div>
 
-            <form id="formulario-cuenta" class="formulario-cuenta oculto">
-                <h3>Agregar cuenta</h3>
+            <form class="formulario-cuenta" x-show="formularioVisible" @submit.prevent="guardarCuenta()">
+                <h3 x-text="idEdicion === null ? 'Agregar cuenta' : 'Editar cuenta'"></h3>
 
                 <div class="campo-formulario">
                     <label for="nombre-cuenta">Nombre de usuario:</label>
-                    <input
-                        type="text"
-                        id="nombre-cuenta"
-                        placeholder="Ejemplo: Juan Pérez"
-                        required
-                    >
+                    <input type="text" id="nombre-cuenta" x-model="nombre"
+                        placeholder="Ejemplo: Juan Pérez" required>
                 </div>
 
                 <div class="campo-formulario">
                     <label for="correo-cuenta">Correo electrónico:</label>
-                    <input
-                        type="email"
-                        id="correo-cuenta"
-                        placeholder="Ejemplo: juan.perez@cybernet.com"
-                        required
-                    >
+                    <input type="email" id="correo-cuenta" x-model="correo"
+                        placeholder="Ejemplo: juan.perez@cybernet.com" required>
                 </div>
 
                 <div class="campo-formulario">
                     <label for="rol-cuenta">Rol:</label>
-                    <select id="rol-cuenta" required>
+                    <select id="rol-cuenta" x-model="rol" required>
                         <option value="Administrador">Administrador</option>
                         <option value="Encargado">Encargado</option>
                     </select>
@@ -101,26 +93,42 @@
 
                 <div class="campo-formulario">
                     <label for="estado-cuenta">Estado:</label>
-                    <select id="estado-cuenta" required>
+                    <select id="estado-cuenta" x-model="estado" required>
                         <option value="activa">Activa</option>
                         <option value="inactiva">Inactiva</option>
                     </select>
                 </div>
 
                 <div class="acciones-formulario">
-                    <button type="submit" class="boton-guardar">
-                        Guardar
-                    </button>
-
-                    <button 
-                        type="button"
-                        id="boton-cancelar-cuenta"
-                        class="boton-cancelar"
-                    >
+                    <button type="submit" class="boton-guardar">Guardar</button>
+                    <button type="button" class="boton-cancelar" @click="cancelarFormulario()">
                         Cancelar
                     </button>
                 </div>
             </form>
+
+            <div class="controles-cuentas">
+                <input type="search" x-model="busqueda"
+                    placeholder="Buscar por nombre o correo">
+
+                <select x-model="filtroRol">
+                    <option value="todos">Todos los roles</option>
+                    <option value="Administrador">Administradores</option>
+                    <option value="Encargado">Encargados</option>
+                </select>
+
+                <select x-model="filtroEstado">
+                    <option value="todos">Todos los estados</option>
+                    <option value="activa">Activas</option>
+                    <option value="inactiva">Inactivas</option>
+                </select>
+
+                <select x-model="orden">
+                    <option value="nombre-asc">Nombre A-Z</option>
+                    <option value="nombre-desc">Nombre Z-A</option>
+                    <option value="correo">Correo electrónico</option>
+                </select>
+            </div>
 
             <div class="contenedor-tabla">
                 <table class="tabla-cuentas">
@@ -134,61 +142,29 @@
                         </tr>
                     </thead>
 
-                    <tbody id="lista-cuentas">
-                        <tr>
-                            <td>Jaimito Rios</td>
-                            <td>admin@cybernet.com</td>
-                            <td>Administrador</td>
-                            <td>
-                                <span class="punto-estado punto-activa"></span>
-                                Activa
-                            </td>
-                            <td>
-                                <button type="button" class="boton-editar-cuenta">
-                                    Editar
-                                </button> 
+                    <tbody>
+                        <template x-for="cuenta in cuentasVisibles" :key="cuenta.id">
+                            <tr>
+                                <td x-text="cuenta.nombre"></td>
+                                <td x-text="cuenta.correo"></td>
+                                <td x-text="cuenta.rol"></td>
+                                <td>
+                                    <span class="punto-estado" :class="claseEstado(cuenta.estado)"></span>
+                                    <span x-text="textoEstado(cuenta.estado)"></span>
+                                </td>
+                                <td>
+                                    <button type="button" class="boton-editar-cuenta"
+                                        @click="editarCuenta(cuenta.id)">Editar</button>
 
-                                <button type="button" class="boton-eliminar-cuenta">
-                                    Eliminar
-                                </button>
-                            </td>
-                        </tr>
+                                    <button type="button" class="boton-eliminar-cuenta"
+                                        @click="eliminarCuenta(cuenta.id)">Eliminar</button>
+                                </td>
+                            </tr>
+                        </template>
 
-                        <tr>
-                            <td>Elianny Ortega</td>
-                            <td>elianny.ortega@cybernet.com</td>
-                            <td>Encargado</td>
-                            <td>
-                                <span class="punto-estado punto-activa"></span>
-                                Activa
-                            </td>
-                            <td>
-                                <button type="button" class="boton-editar-cuenta">
-                                    Editar
-                                </button> 
-
-                                <button type="button" class="boton-eliminar-cuenta">
-                                    Eliminar
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Roberto Carlos</td>
-                            <td>roberto.carlos@cybernet.com</td>
-                            <td>Encargado</td>
-                            <td>
-                                <span class="punto-estado punto-inactiva"></span>
-                                Inactiva
-                            </td>
-                            <td>
-                                <button type="button" class="boton-editar-cuenta">
-                                    Editar
-                                </button> 
-
-                                <button type="button" class="boton-eliminar-cuenta">
-                                    Eliminar
-                                </button>
+                        <tr x-show="cuentasVisibles.length === 0">
+                            <td colspan="5" class="mensaje-sin-resultados">
+                                No hay cuentas registradas.
                             </td>
                         </tr>
                     </tbody>
