@@ -1,207 +1,306 @@
+function obtenerComputadoresIniciales() {
+    return [
+        {
+            id: 1,
+            nombre: "PC 01",
+            estado: "disponible",
+            ubicacion: "Sala principal"
+        },
+        {
+            id: 2,
+            nombre: "PC 02",
+            estado: "ocupado",
+            ubicacion: "Sala principal"
+        },
+        {
+            id: 3,
+            nombre: "PC 03",
+            estado: "disponible",
+            ubicacion: "Sala principal"
+        },
+        {
+            id: 4,
+            nombre: "PC 04",
+            estado: "fuera-servicio",
+            ubicacion: "Sala secundaria"
+        },
+        {
+            id: 5,
+            nombre: "PC 05",
+            estado: "ocupado",
+            ubicacion: "Sala secundaria"
+        },
+        {
+            id: 6,
+            nombre: "PC 06",
+            estado: "disponible",
+            ubicacion: "Sala secundaria"
+        }
+    ];
+}
+
 /* Mapa de equipos */
-const filtroEstado = document.getElementById("filtro-estado");
-const tarjetasEquipos = document.querySelectorAll(".tarjeta-equipo");
+function gestionMapaEquipos() {
+    return {
+        computadores: [],
+        filtroEstado: "todos",
 
-if (filtroEstado) {
-    filtroEstado.addEventListener("change", function () {
-        const estadoSeleccionado = filtroEstado.value;
+        iniciar() {
+            const guardados = localStorage.getItem(
+                "cybernet_computadores"
+            );
 
-        tarjetasEquipos.forEach(function (tarjeta) {
-            const estadoEquipo = tarjeta.dataset.estado;
-
-            if (
-                estadoSeleccionado === "todos" ||
-                estadoSeleccionado === estadoEquipo
-            ) {
-                tarjeta.style.display = "block";
+            if (guardados) {
+                this.computadores = JSON.parse(guardados);
             } else {
-                tarjeta.style.display = "none";
+                this.computadores = obtenerComputadoresIniciales();
+
+                localStorage.setItem(
+                    "cybernet_computadores",
+                    JSON.stringify(this.computadores)
+                );
             }
-        });
-    });
+        },
+
+        get computadoresVisibles() {
+            const resultado = this.computadores.filter(
+                (computador) =>
+                    this.filtroEstado === "todos" ||
+                    computador.estado === this.filtroEstado
+            );
+
+            return resultado.sort((a, b) =>
+                a.nombre.localeCompare(
+                    b.nombre,
+                    "es",
+                    { numeric: true }
+                )
+            );
+        },
+
+        textoEstado(estado) {
+            if (estado === "ocupado") {
+                return "En uso";
+            }
+
+            if (estado === "fuera-servicio") {
+                return "Fuera de servicio";
+            }
+
+            return "Disponible";
+        },
+
+        claseEstado(estado) {
+            if (estado === "ocupado") {
+                return "punto-ocupado";
+            }
+
+            if (estado === "fuera-servicio") {
+                return "punto-fuera-servicio";
+            }
+
+            return "punto-disponible";
+        }
+    };
 }
 
 /* Gestión de computadores */
-const botonAgregarComputador = document.getElementById(
-    "boton-agregar-computador"
-);
+function gestionComputadores() {
+    return {
+        computadores: [],
+        formularioVisible: false,
+        idEdicion: null,
 
-const formularioComputador = document.getElementById(
-    "formulario-computador"
-);
+        nombre: "",
+        estado: "disponible",
+        ubicacion: "Sala principal",
+        busqueda: "",
+        filtroEstado: "todos",
+        orden: "nombre-asc",
 
-const botonCancelar = document.getElementById("boton-cancelar");
-
-if (botonAgregarComputador && formularioComputador && botonCancelar) {
-    botonAgregarComputador.addEventListener("click", function () {
-        formularioComputador.classList.remove("oculto");
-    });
-
-    botonCancelar.addEventListener("click", function () {
-        formularioComputador.classList.add("oculto");
-        formularioComputador.reset();
-    });
-}
-
-const nombreComputador = document.getElementById("nombre-computador");
-const estadoComputador = document.getElementById("estado-computador");
-const ubicacionComputador = document.getElementById(
-    "ubicacion-computador"
-);
-
-const listaComputadores = document.getElementById("lista-computadores");
-
-if (
-    formularioComputador &&
-    nombreComputador &&
-    estadoComputador &&
-    ubicacionComputador &&
-    listaComputadores
-) {
-    formularioComputador.addEventListener("submit", function (evento) {
-        evento.preventDefault();
-
-        const nombre = nombreComputador.value.trim();
-        const estado = estadoComputador.value;
-        const ubicacion = ubicacionComputador.value;
-
-        let textoEstado = "Disponible";
-        let claseEstado = "punto-disponible";
-
-        if (estado === "ocupado") {
-            textoEstado = "En uso";
-            claseEstado = "punto-ocupado";
-        } else if (estado === "fuera-servicio") {
-            textoEstado = "Fuera de servicio";
-            claseEstado = "punto-fuera-servicio";
-        }
-
-        const nuevaFila = listaComputadores.insertRow();
-
-        const celdaNombre = nuevaFila.insertCell();
-        const celdaEstado = nuevaFila.insertCell();
-        const celdaUbicacion = nuevaFila.insertCell();
-        const celdaAcciones = nuevaFila.insertCell();
-
-        celdaNombre.textContent = nombre;
-        celdaUbicacion.textContent = ubicacion;
-
-        const puntoEstado = document.createElement("span");
-        puntoEstado.classList.add("punto-estado", claseEstado);
-
-        celdaEstado.appendChild(puntoEstado);
-        celdaEstado.append(" " + textoEstado);
-
-        const botonEditar = document.createElement("button");
-        botonEditar.type = "button";
-        botonEditar.textContent = "Editar";
-        botonEditar.classList.add("boton-editar");
-
-        const botonEliminar = document.createElement("button");
-        botonEliminar.type = "button";
-        botonEliminar.textContent = "Eliminar";
-        botonEliminar.classList.add("boton-eliminar");
-
-        celdaAcciones.appendChild(botonEditar);
-        celdaAcciones.append(" ");
-        celdaAcciones.appendChild(botonEliminar);
-
-        formularioComputador.reset();
-        formularioComputador.classList.add("oculto");
-    });
-}
-
-if (listaComputadores) {
-    listaComputadores.addEventListener("click", function (evento) {
-        const elementoPresionado = evento.target;
-        const filaComputador = elementoPresionado.closest("tr");
-
-        if (!filaComputador) {
-            return;
-        }
-
-        if (elementoPresionado.classList.contains("boton-eliminar")) {
-            const nombreEquipo = filaComputador.cells[0].textContent;
-
-            const confirmarEliminacion = confirm(
-                "¿Deseas eliminar el equipo " + nombreEquipo + "?"
+        iniciar() {
+            const guardados = localStorage.getItem(
+                "cybernet_computadores"
             );
 
-            if (confirmarEliminacion) {
-                filaComputador.remove();
+            if (guardados) {
+                this.computadores = JSON.parse(guardados);
+            } else {
+                this.computadores = obtenerComputadoresIniciales();
+                this.guardarEnStorage();
             }
-        }
+        },
 
-        if (elementoPresionado.classList.contains("boton-editar")) {
-            const nombreActual = filaComputador.cells[0].textContent;
-            const ubicacionActual = filaComputador.cells[2].textContent;
-
-            const puntoEstado = filaComputador.querySelector(".punto-estado");
-
-            let estadoActual = "disponible";
-
-            if (puntoEstado.classList.contains("punto-ocupado")) {
-                estadoActual = "ocupado";
-            } else if (
-                puntoEstado.classList.contains("punto-fuera-servicio")
-            ) {
-                estadoActual = "fuera-servicio";
-            }
-
-            const nuevoNombre = prompt(
-                "Nombre del equipo:",
-                nombreActual
+        guardarEnStorage() {
+            localStorage.setItem(
+                "cybernet_computadores",
+                JSON.stringify(this.computadores)
             );
+        },
 
-            if (nuevoNombre === null || nuevoNombre.trim() === "") {
+        abrirFormulario() {
+            this.idEdicion = null;
+            this.nombre = "";
+            this.estado = "disponible";
+            this.ubicacion = "Sala principal";
+            this.formularioVisible = true;
+        },
+
+        cancelarFormulario() {
+            this.formularioVisible = false;
+            this.idEdicion = null;
+            this.nombre = "";
+            this.estado = "disponible";
+            this.ubicacion = "Sala principal";
+        },
+
+        guardarComputador() {
+            const nombreLimpio = this.nombre.trim();
+
+            if (nombreLimpio === "") {
+                alert("Debes ingresar el nombre del computador.");
                 return;
             }
 
-            const nuevoEstado = prompt(
-                "Estado: disponible, ocupado o fuera-servicio",
-                estadoActual
+            const nombreRepetido = this.computadores.some(
+                (computador) =>
+                    computador.nombre.toLowerCase() ===
+                        nombreLimpio.toLowerCase() &&
+                    computador.id !== this.idEdicion
             );
 
-            if (
-                nuevoEstado !== "disponible" &&
-                nuevoEstado !== "ocupado" &&
-                nuevoEstado !== "fuera-servicio"
-            ) {
-                alert("El estado ingresado no es válido.");
+            if (nombreRepetido) {
+                alert("Ya existe un computador con ese nombre.");
                 return;
             }
 
-            const nuevaUbicacion = prompt(
-                "Ubicación del equipo:",
-                ubicacionActual
+            if (this.idEdicion === null) {
+                this.computadores.push({
+                    id: Date.now(),
+                    nombre: nombreLimpio,
+                    estado: this.estado,
+                    ubicacion: this.ubicacion
+                });
+            } else {
+                const indice = this.computadores.findIndex(
+                    (computador) =>
+                        computador.id === this.idEdicion
+                );
+
+                this.computadores.splice(indice, 1, {
+                    id: this.idEdicion,
+                    nombre: nombreLimpio,
+                    estado: this.estado,
+                    ubicacion: this.ubicacion
+                });
+            }
+
+            this.guardarEnStorage();
+            this.cancelarFormulario();
+        },
+
+        editarComputador(id) {
+            const computador = this.computadores.find(
+                (computador) => computador.id === id
             );
 
-            if (nuevaUbicacion === null || nuevaUbicacion.trim() === "") {
+            if (!computador) {
                 return;
             }
 
-            let textoEstado = "Disponible";
-            let claseEstado = "punto-disponible";
+            this.idEdicion = computador.id;
+            this.nombre = computador.nombre;
+            this.estado = computador.estado;
+            this.ubicacion = computador.ubicacion;
+            this.formularioVisible = true;
+        },
 
-            if (nuevoEstado === "ocupado") {
-                textoEstado = "En uso";
-                claseEstado = "punto-ocupado";
-            } else if (nuevoEstado === "fuera-servicio") {
-                textoEstado = "Fuera de servicio";
-                claseEstado = "punto-fuera-servicio";
+        eliminarComputador(id) {
+            const computador = this.computadores.find(
+                (computador) => computador.id === id
+            );
+
+            if (!computador) {
+                return;
             }
 
-            filaComputador.cells[0].textContent = nuevoNombre.trim();
-            filaComputador.cells[2].textContent = nuevaUbicacion.trim();
+            const confirmar = confirm(
+                "¿Deseas eliminar el equipo " +
+                    computador.nombre +
+                    "?"
+            );
 
-            const celdaEstado = filaComputador.cells[1];
+            if (!confirmar) {
+                return;
+            }
 
-            celdaEstado.textContent = "";
-            puntoEstado.className = "punto-estado " + claseEstado;
-            celdaEstado.appendChild(puntoEstado);
-            celdaEstado.append(" " + textoEstado);
+            this.computadores = this.computadores.filter(
+                (computador) => computador.id !== id
+            );
+
+            this.guardarEnStorage();
+        },
+
+        get computadoresVisibles() {
+            const texto = this.busqueda.trim().toLowerCase();
+
+            const resultado = this.computadores.filter((computador) => {
+                const coincideTexto =
+                    computador.nombre.toLowerCase().includes(texto) ||
+                    computador.ubicacion.toLowerCase().includes(texto);
+
+                const coincideEstado =
+                    this.filtroEstado === "todos" ||
+                    computador.estado === this.filtroEstado;
+
+                return coincideTexto && coincideEstado;
+            });
+
+            return resultado.sort((a, b) => {
+                if (this.orden === "nombre-desc") {
+                    return b.nombre.localeCompare(
+                        a.nombre,
+                        "es",
+                        { numeric: true }
+                    );
+                }
+
+                if (this.orden === "ubicacion") {
+                    return a.ubicacion.localeCompare(b.ubicacion);
+                }
+
+                return a.nombre.localeCompare(
+                    b.nombre,
+                    "es",
+                    { numeric: true }
+                );
+            });
+        },
+
+        textoEstado(estado) {
+            if (estado === "ocupado") {
+                return "En uso";
+            }
+
+            if (estado === "fuera-servicio") {
+                return "Fuera de servicio";
+            }
+
+            return "Disponible";
+        },
+
+        claseEstado(estado) {
+            if (estado === "ocupado") {
+                return "punto-ocupado";
+            }
+
+            if (estado === "fuera-servicio") {
+                return "punto-fuera-servicio";
+            }
+
+            return "punto-disponible";
         }
-    });
+    };
 }
 
 /* Gestión de cuentas */
