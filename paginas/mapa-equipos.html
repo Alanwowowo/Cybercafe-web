@@ -13,116 +13,140 @@
 
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="../css/equipos-cuentas.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
 </head>
 
-<body>
-    <header>
-        <h1>CyberNet</h1>
+<body x-data="{ menuAbierto: false }" @keydown.escape.window="menuAbierto = false">
+
+    <button class="boton-menu" type="button" @click="menuAbierto = !menuAbierto" aria-label="Abrir menú">
+        <span x-text="menuAbierto ? '×' : '☰'"></span>
+    </button>
+
+    <div class="fondo-menu" x-cloak x-show="menuAbierto"
+        x-transition.opacity @click="menuAbierto = false">
+    </div>
+
+    <aside class="sidebar" :class="{ 'abierto': menuAbierto }">
+        <div class="sidebar-logo">
+            <h1>CyberNet</h1>
+            <p>Sistema de gestión</p>
+        </div>
+
         <nav>
             <ul>
-                <li><a href="gestion-clientes.html">Gestión de clientes</a></li>
-                <li><a href="gestion-computadores.html">Gestión de computadores</a></li>
-                <li><a href="gestion-cuentas.html">Gestión de cuentas</a></li>
-                <li><a href="historial.html">Historial de sesiones</a></li>
-                <li><a href="inicio-admin.html">Inicio del administrador</a></li>
-                <li><a href="inicio-encargado.html">Inicio del encargado</a></li>
-                <li><a href="sesion.html">Registro y cierre de sesión</a></li>
-                <li><a href="../index.html">Cerrar sesión</a></li>
+                <li><a href="inicio-admin.html"><span class="sidebar-icono">⌂</span>Inicio administrador</a></li>
+                <li><a href="inicio-encargado.html"><span class="sidebar-icono">⌂</span>Inicio encargado</a></li>
+                <li><a href="gestion-clientes.html"><span class="sidebar-icono">♟</span>Gestión de clientes</a></li>
+                <li><a href="gestion-computadores.html"><span class="sidebar-icono">▣</span>Computadores</a></li>
+                <li><a href="gestion-cuentas.html"><span class="sidebar-icono">⚙</span>Gestión de cuentas</a></li>
+                <li><a href="historial.html"><span class="sidebar-icono">◷</span>Historial</a></li>
+                <li><a href="mapa-equipos.html" class="active"><span class="sidebar-icono">⌖</span>Mapa de equipos</a></li>
+                <li><a href="sesion.html"><span class="sidebar-icono">▶</span>Sesiones</a></li>
             </ul>
         </nav>
-        <p>Sistema de gestión del cibercafé</p>
-    </header>
 
-<main>
-    <section class="seccion-mapa">
-        <h2>Mapa de equipos</h2>
-        <p>Consulta el estado actual de los computadores del cibercafé.</p>
-
-        <div class="leyenda-estados">
-            <p>
-                <span class="punto-estado punto-disponible"></span>
-                Disponible
-            </p>
-
-            <p>
-                <span class="punto-estado punto-ocupado"></span>
-                En uso
-            </p>
-
-            <p>
-                <span class="punto-estado punto-fuera-servicio"></span>
-                Fuera de servicio
-            </p>
+        <div class="sidebar-cerrar">
+            <a href="../index.html"><span class="sidebar-icono">↪</span>Cerrar sesión</a>
         </div>
+    </aside>
 
-        <div class="filtro-equipos">
-            <label for="filtro-estado">Filtrar por estado:</label>
+    <div class="contenido-pagina">
+        <header>
+            <h1>Mapa de equipos</h1>
+            <p>Sistema de gestión del cibercafé</p>
+        </header>
 
-            <select id="filtro-estado">
-                <option value="todos">Todos</option>
-                <option value="disponible">Disponibles</option>
-                <option value="ocupado">En uso</option>
-                <option value="fuera-servicio">Fuera de servicio</option>
-            </select>
-        </div>
+        <main>
+            <section class="seccion-mapa">
+                <h2>Mapa de equipos</h2>
+                <p>Consulta el estado actual de los computadores del cibercafé.</p>
 
-        <div class="lista-equipos">
-            <article class="tarjeta-equipo" data-estado="disponible">
-                <h3>PC 01</h3>
-                <p class="estado-equipo">
-                    <span class="punto-estado punto-disponible"></span>
-                    Disponible
-                </p>
-            </article>
+                <div class="leyenda-estados">
+                    <p>
+                        <span class="punto-estado punto-disponible"></span>
+                        Disponible
+                    </p>
 
-            <article class="tarjeta-equipo" data-estado="ocupado">
-                <h3>PC 02</h3>
-                <p class="estado-equipo">
-                    <span class="punto-estado punto-ocupado"></span>
-                    En uso
-                </p>
-            </article>
+                    <p>
+                        <span class="punto-estado punto-ocupado"></span>
+                        En uso
+                    </p>
 
-            <article class="tarjeta-equipo" data-estado="disponible">
-                <h3>PC 03</h3>
-                <p class="estado-equipo">
-                    <span class="punto-estado punto-disponible"></span>
-                    Disponible
-                </p>
-            </article>
+                    <p>
+                        <span class="punto-estado punto-fuera-servicio"></span>
+                        Fuera de servicio
+                    </p>
+                </div>
 
-            <article class="tarjeta-equipo" data-estado="fuera-servicio">
-                <h3>PC 04</h3>
-                <p class="estado-equipo">
-                    <span class="punto-estado punto-fuera-servicio"></span>
-                    Fuera de servicio
-                </p>
-            </article>
+                <div class="filtro-equipos">
+                    <label for="filtro-estado">Filtrar por estado:</label>
 
-            <article class="tarjeta-equipo" data-estado="ocupado">
-                <h3>PC 05</h3>
-                <p class="estado-equipo">
-                    <span class="punto-estado punto-ocupado"></span>
-                    En uso
-                </p>
-            </article>
+                    <select id="filtro-estado">
+                        <option value="todos">Todos</option>
+                        <option value="disponible">Disponibles</option>
+                        <option value="ocupado">En uso</option>
+                        <option value="fuera-servicio">Fuera de servicio</option>
+                    </select>
+                </div>
 
-            <article class="tarjeta-equipo" data-estado="disponible">
-                <h3>PC 06</h3>
-                <p class="estado-equipo">
-                    <span class="punto-estado punto-disponible"></span>
-                    Disponible
-                </p>
-            </article>
-        </div>
-    </section>
-</main>
+                <div class="lista-equipos">
+                    <article class="tarjeta-equipo" data-estado="disponible">
+                        <h3>PC 01</h3>
+                        <p class="estado-equipo">
+                            <span class="punto-estado punto-disponible"></span>
+                            Disponible
+                        </p>
+                    </article>
 
-    <footer>
-        <p>©2026 CyberNet. Todos los derechos reservados.</p>
-        <p>Soporte: soporte@cybernet.com</p>
-        <p>Contacto: +56 9 1234 5678</p>
-    </footer>
+                    <article class="tarjeta-equipo" data-estado="ocupado">
+                        <h3>PC 02</h3>
+                        <p class="estado-equipo">
+                            <span class="punto-estado punto-ocupado"></span>
+                            En uso
+                        </p>
+                    </article>
+
+                    <article class="tarjeta-equipo" data-estado="disponible">
+                        <h3>PC 03</h3>
+                        <p class="estado-equipo">
+                            <span class="punto-estado punto-disponible"></span>
+                            Disponible
+                        </p>
+                    </article>
+
+                    <article class="tarjeta-equipo" data-estado="fuera-servicio">
+                        <h3>PC 04</h3>
+                        <p class="estado-equipo">
+                            <span class="punto-estado punto-fuera-servicio"></span>
+                            Fuera de servicio
+                        </p>
+                    </article>
+
+                    <article class="tarjeta-equipo" data-estado="ocupado">
+                        <h3>PC 05</h3>
+                        <p class="estado-equipo">
+                            <span class="punto-estado punto-ocupado"></span>
+                            En uso
+                        </p>
+                    </article>
+
+                    <article class="tarjeta-equipo" data-estado="disponible">
+                        <h3>PC 06</h3>
+                        <p class="estado-equipo">
+                            <span class="punto-estado punto-disponible"></span>
+                            Disponible
+                        </p>
+                    </article>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>©2026 CyberNet. Todos los derechos reservados.</p>
+            <p>Soporte: soporte@cybernet.com</p>
+            <p>Contacto: +56 9 1234 5678</p>
+        </footer>
+    </div>
 
     <script src="../js/aplicacion.js"></script>
     <script src="../js/equipos-cuentas.js"></script>
