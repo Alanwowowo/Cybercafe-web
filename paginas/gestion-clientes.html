@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,77 +13,107 @@
 
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="../css/clientes-sesiones.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
 </head>
 
-<body>
-    <header>
-        <h1>CyberNet</h1>
+<body x-data="{ menuAbierto: false }" @keydown.escape.window="menuAbierto = false">
+
+    <button class="boton-menu" type="button" @click="menuAbierto = !menuAbierto" aria-label="Abrir menú">
+        <span x-text="menuAbierto ? '×' : '☰'"></span>
+    </button>
+
+    <div class="fondo-menu" x-cloak x-show="menuAbierto"
+        x-transition.opacity @click="menuAbierto = false">
+    </div>
+
+    <aside class="sidebar" :class="{ 'abierto': menuAbierto }">
+        <div class="sidebar-logo">
+            <h1>CyberNet</h1>
+            <p>Sistema de gestión</p>
+        </div>
+
         <nav>
             <ul>
-                <li><a href="gestion-computadores.html">Gestión de computadores</a></li>
-                <li><a href="gestion-cuentas.html">Gestión de cuentas</a></li>
-                <li><a href="historial.html">Historial de sesiones</a></li>
-                <li><a href="inicio-admin.html">Inicio del administrador</a></li>
-                <li><a href="inicio-encargado.html">Inicio del encargado</a></li>
-                <li><a href="mapa-equipos.html">Mapa de equipos</a></li>
-                <li><a href="sesion.html">Registro y cierre de sesión</a></li>
-                <li><a href="../index.html">Cerrar sesión</a></li>
+                <li><a href="inicio-admin.html"><span class="sidebar-icono">⌂</span>Inicio administrador</a></li>
+                <li><a href="inicio-encargado.html"><span class="sidebar-icono">⌂</span>Inicio encargado</a></li>
+                <li><a href="gestion-clientes.html" class="active"><span class="sidebar-icono">♟</span>Gestión de clientes</a></li>
+                <li><a href="gestion-computadores.html"><span class="sidebar-icono">▣</span>Computadores</a></li>
+                <li><a href="gestion-cuentas.html"><span class="sidebar-icono">⚙</span>Gestión de cuentas</a></li>
+                <li><a href="historial.html"><span class="sidebar-icono">◷</span>Historial</a></li>
+                <li><a href="mapa-equipos.html"><span class="sidebar-icono">⌖</span>Mapa de equipos</a></li>
+                <li><a href="sesion.html"><span class="sidebar-icono">▶</span>Sesiones</a></li>
             </ul>
         </nav>
-        <p>Sistema de gestión del cibercafé</p>
-    </header>
 
-    <main>
-        <section>
-            <h3>Registrar nuevo cliente</h3>
-            <form id="form-cliente">
-                <div>
-                    <label for="id-cliente">ID / RUT:</label>
-                    <input type="text" id="id-cliente" required placeholder="12.345.678-9">
-                </div>
-                <div>
-                    <label for="nombre-cliente">Nombre y Apellido:</label>
-                    <input type="text" id="nombre-cliente" required placeholder="Nombre">
-                </div>
-                <div>
-                    <label for="correo-cliente">Email:</label>
-                    <input type="email" id="correo-cliente" required placeholder="correo@ejemplo.com">
-                </div>
-                <button type="submit">Registrar Cliente</button>
-            </form>
-        </section>
-        <section>
-            <h3>Buscar Clientes</h3>
-            <input type="text" id="buscar-cliente" placeholder="ID, Nombre o Email">
-        </section>
-        <section>
-            <h3>Lista de Clientes</h3>
-            <div class="contenedor-tabla-clientes">
-                <table id="tabla-clientes">
-                    <thead>
-                        <tr>
-                            <th>ID / RUT</th>
-                            <th>Nombre y Apellido</th>
-                            <th>Email</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+        <div class="sidebar-cerrar">
+            <a href="../index.html"><span class="sidebar-icono">↪</span>Cerrar sesión</a>
+        </div>
+    </aside>
 
-    <footer>
-        <p>©2026 CyberNet. Todos los derechos reservados.</p>
-        <p>Soporte: soporte@cybernet.com</p>
-        <p>Contacto: +56 9 1234 5678</p>
-    </footer>
+    <div class="contenido-pagina">
+        <header>
+            <h1>Gestión de clientes</h1>
+            <p>Sistema de gestión del cibercafé</p>
+        </header>
+
+        <main>
+            <section>
+                <h3>Registrar nuevo cliente</h3>
+
+                <form id="form-cliente">
+                    <div>
+                        <label for="id-cliente">ID / RUT:</label>
+                        <input type="text" id="id-cliente" required placeholder="12.345.678-9">
+                    </div>
+
+                    <div>
+                        <label for="nombre-cliente">Nombre y Apellido:</label>
+                        <input type="text" id="nombre-cliente" required placeholder="Nombre">
+                    </div>
+
+                    <div>
+                        <label for="correo-cliente">Email:</label>
+                        <input type="email" id="correo-cliente" required placeholder="correo@ejemplo.com">
+                    </div>
+
+                    <button type="submit">Registrar Cliente</button>
+                </form>
+            </section>
+
+            <section>
+                <h3>Buscar clientes</h3>
+                <input type="text" id="buscar-cliente" placeholder="ID, nombre o email">
+            </section>
+
+            <section>
+                <h3>Lista de clientes</h3>
+
+                <div class="contenedor-tabla-clientes">
+                    <table id="tabla-clientes">
+                        <thead>
+                            <tr>
+                                <th>ID / RUT</th>
+                                <th>Nombre y Apellido</th>
+                                <th>Email</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>©2026 CyberNet. Todos los derechos reservados.</p>
+            <p>Soporte: soporte@cybernet.com</p>
+            <p>Contacto: +56 9 1234 5678</p>
+        </footer>
+    </div>
 
     <script src="../js/aplicacion.js"></script>
     <script src="../js/clientes-sesiones.js"></script>
     <script src="../js/pwa.js"></script>
-
 </body>
+
 </html>

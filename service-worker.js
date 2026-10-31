@@ -1,10 +1,10 @@
-const nombreCache = "cybernet-v3";
+const nombreCache = "cybernet-v4";
 
 const archivosCache = [
     "/",
     "/index.html",
     "/manifest.json",
-    
+
     "/imagenes/iconos/icono-192.png",
     "/imagenes/iconos/icono-512.png",
 
@@ -13,6 +13,7 @@ const archivosCache = [
     "/css/paneles.css",
     "/css/equipos-cuentas.css",
     "/css/clientes-sesiones.css",
+    "/css/sidebar.css",
 
     "/js/aplicacion.js",
     "/js/paneles.js",
