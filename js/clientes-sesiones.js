@@ -115,7 +115,6 @@ document.addEventListener('alpine:init', () => {
         return;
       }
 
-      // Validacion de formato de RUT
       const rutRegex = /^(\d{1,2}\.\d{3}\.\d{3}-[\dkK]|\d{7,8}-[\dkK])$/;
       if (!rutRegex.test(id)) {
         this.mensajeError = 'Ingrese un RUT con formato válido (Ej: 12345678-9 o 12.345.678-K).';
@@ -226,7 +225,8 @@ document.addEventListener('alpine:init', () => {
         computador: this.selectComputador,
         horaInicio: ahora.getTime(),
         horaInicioTexto: String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0'),
-        fecha: `${anio}-${mes}-${dia}`
+        fecha: `${anio}-${mes}-${dia}`,
+        costosAdicionales: 0
       };
 
       this.sesionesActivas.push(nuevaSesion);
@@ -258,7 +258,7 @@ document.addEventListener('alpine:init', () => {
 
       const tarifaPorMinuto = this.precioHora / 60;
       const costoTiempo = Math.round(duracion * tarifaPorMinuto);
-      const extras = Number(this.costosAdicionales) || 0;
+      const extras = Number(sesion.costosAdicionales) || 0;
       const montoFinal = costoTiempo + extras;
 
       const registroHistorial = {
@@ -275,7 +275,6 @@ document.addEventListener('alpine:init', () => {
       this.sesionesActivas = this.sesionesActivas.filter(s => s.id !== sesion.id);
       this.guardarSesionesActivas();
 
-      this.costosAdicionales = 0;
       alert('Sesión finalizada y guardada en el historial.');
     },
 
@@ -299,7 +298,7 @@ document.addEventListener('alpine:init', () => {
 
       resultado.sort((a, b) => {
         if (this.ordenHistorial === 'fecha-desc') return b.fecha.localeCompare(a.fecha);
-        if (this.ordenHistorial === 'fecha-asc') return a.fecha.localeCompare(b.fecha);
+        if (this.ordenHistorial === 'fecha-asc') return a.fecha.localeCompare(a.fecha);
         if (this.ordenHistorial === 'monto-desc') return b.monto - a.monto;
         if (this.ordenHistorial === 'monto-asc') return a.monto - b.monto;
         return 0;

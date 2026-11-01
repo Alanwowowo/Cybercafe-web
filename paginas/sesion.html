@@ -86,31 +86,29 @@
             </section>
 
             <section>
-                <h3>Finalizar sesión</h3>
+                <h3>Sesiones activas</h3>
 
-                <form id="cierre-sesion">
-                    <div>
-                        <label for="costos-adicionales">Costos extras ($):</label>
-                        <input type="number" id="costos-adicionales" x-model="costosAdicionales"
-                            min="0" placeholder="0">
+                <template x-if="sesionesActivas.length === 0">
+                    <p>No hay sesiones activas en este momento.</p>
+                </template>
+
+                <template x-for="sesion in sesionesActivas" :key="sesion.id">
+                    <div id="detalle-resumen" style="margin-bottom: 20px;">
+                        <p><strong>Cliente:</strong> <span x-text="sesion.cliente"></span></p>
+                        <p><strong>Computador:</strong> <span x-text="sesion.computador"></span></p>
+                        <p><strong>Hora de inicio:</strong> <span x-text="sesion.horaInicioTexto"></span></p>
+                        <p><strong>Estado:</strong> En curso</p>
+                        
+                        <div>
+                            <label>Costos extras ($):</label>
+                            <input type="number" x-model.number="sesion.costosAdicionales" min="0" placeholder="0">
+                        </div>
+
+                        <button type="button" @click="finalizarSesion(sesion)">
+                            Finalizar y cobrar
+                        </button>
                     </div>
-
-                    <button type="button" id="btn-finalizar" @click="finalizarSesion()">
-                        Finalizar y cobrar
-                    </button>
-                </form>
-            </section>
-
-            <section>
-                <h3>Resumen de cobro</h3>
-
-                <div id="detalle-resumen">
-                    <p><strong>Cliente:</strong> <span id="resumen-cliente" x-text="sesionActiva ? sesionActiva.cliente : '-'">-</span></p>
-                    <p><strong>Computador:</strong> <span id="resumen-computador" x-text="sesionActiva ? sesionActiva.computador : '-'">-</span></p>
-                    <p><strong>Hora de inicio:</strong> <span id="resumen-inicio" x-text="sesionActiva ? sesionActiva.horaInicioTexto : '-'">-</span></p>
-                    <p><strong>Estado:</strong> <span id="resumen-termino" x-text="sesionActiva ? 'En curso' : 'Sin sesión activa'">-</span></p>
-                    <p><strong>Costos extras asignados:</strong> <span id="resumen-costo-extra" x-text="'$' + (costosAdicionales || 0)">$0</span></p>
-                </div>
+                </template>
             </section>
         </main>
 
