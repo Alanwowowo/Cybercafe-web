@@ -12,6 +12,138 @@ function leerDatos(clave) {
     }
 }
 
+// Inicializar datos por defecto si no existen en localStorage (sin sobrescribir existentes)
+function inicializarDatos() {
+    try {
+        if (localStorage.getItem("cybernet_computadores") === null) {
+            const computadoresIniciales = [
+                {
+                    id: 1,
+                    nombre: "PC 01",
+                    estado: "disponible",
+                    ubicacion: "Sala principal"
+                },
+                {
+                    id: 2,
+                    nombre: "PC 02",
+                    estado: "ocupado",
+                    ubicacion: "Sala principal"
+                },
+                {
+                    id: 3,
+                    nombre: "PC 03",
+                    estado: "disponible",
+                    ubicacion: "Sala principal"
+                },
+                {
+                    id: 4,
+                    nombre: "PC 04",
+                    estado: "fuera-servicio",
+                    ubicacion: "Sala secundaria"
+                },
+                {
+                    id: 5,
+                    nombre: "PC 05",
+                    estado: "ocupado",
+                    ubicacion: "Sala secundaria"
+                },
+                {
+                    id: 6,
+                    nombre: "PC 06",
+                    estado: "disponible",
+                    ubicacion: "Sala secundaria"
+                }
+            ];
+            localStorage.setItem(
+                "cybernet_computadores",
+                JSON.stringify(computadoresIniciales)
+            );
+        }
+
+        if (localStorage.getItem("cybernet_cuentas") === null) {
+            const cuentasIniciales = [
+                {
+                    id: 1,
+                    nombre: "Jaimito Rios",
+                    correo: "admin@cybernet.com",
+                    rol: "Administrador",
+                    estado: "activa"
+                },
+                {
+                    id: 2,
+                    nombre: "Elianny Ortega",
+                    correo: "elianny.ortega@cybernet.com",
+                    rol: "Encargado",
+                    estado: "activa"
+                },
+                {
+                    id: 3,
+                    nombre: "Roberto Carlos",
+                    correo: "roberto.carlos@cybernet.com",
+                    rol: "Encargado",
+                    estado: "inactiva"
+                }
+            ];
+            localStorage.setItem(
+                "cybernet_cuentas",
+                JSON.stringify(cuentasIniciales)
+            );
+        }
+
+        if (localStorage.getItem("cybernet_clientes") === null) {
+            const clientesIniciales = [
+                {
+                    id: "12345678-9",
+                    nombre: "Jorge Gonzalez",
+                    correo: "jorge@ejemplo.com"
+                },
+                {
+                    id: "98765432-1",
+                    nombre: "Alvaro Herreros",
+                    correo: "alvaro@ejemplo.com"
+                },
+                {
+                    id: "32323345-5",
+                    nombre: "Pablo Paez",
+                    correo: "pablo@ejemplo.com"
+                }
+            ];
+            localStorage.setItem(
+                "cybernet_clientes",
+                JSON.stringify(clientesIniciales)
+            );
+        }
+
+        if (localStorage.getItem("cybernet_historial") === null) {
+            const historialInicial = [
+                {
+                    cliente: "Jorge Gonzalez",
+                    computador: "PC 01",
+                    fecha: "2024-04-15",
+                    duracion: "300 min",
+                    monto: 10000
+                },
+                {
+                    cliente: "Pablo Paez",
+                    computador: "PC 06",
+                    fecha: "2021-08-29",
+                    duracion: "67 min",
+                    monto: 2500
+                }
+            ];
+            localStorage.setItem(
+                "cybernet_historial",
+                JSON.stringify(historialInicial)
+            );
+        }
+    } catch (e) {
+        // En caso de que localStorage no esté disponible
+    }
+}
+
+// Asegurar la inicialización de datos antes de calcular los paneles
+inicializarDatos();
+
 // 1. Formulario de inicio de sesión
 const formularioLogin = document.getElementById("form-login");
 
@@ -66,11 +198,22 @@ if (totalSesionesActivas || totalEquiposDisponibles || totalRecaudado) {
         totalEquiposDisponibles.textContent = disponibles;
     }
 
-    // Total recaudado sumando montos del historial
+    // Total recaudado del día actual sumando montos del historial
     if (totalRecaudado) {
-        const total = historial.reduce(function (acumulado, s) {
+        const ahora = new Date();
+        const anio = ahora.getFullYear();
+        const mes = String(ahora.getMonth() + 1).padStart(2, "0");
+        const dia = String(ahora.getDate()).padStart(2, "0");
+        const fechaHoy = `${anio}-${mes}-${dia}`;
+
+        const registrosHoy = historial.filter(function (s) {
+            return s.fecha === fechaHoy;
+        });
+
+        const total = registrosHoy.reduce(function (acumulado, s) {
             return acumulado + (Number(s.monto) || 0);
         }, 0);
+
         totalRecaudado.textContent = "$" + total.toLocaleString("es-CL");
     }
 }
