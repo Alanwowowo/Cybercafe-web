@@ -28,6 +28,8 @@ document.addEventListener('alpine:init', () => {
       this.cargarComputadoresAlan();
       this.cargarClientes();
       this.cargarSesionesActivas();
+      this.sincronizarComputadoresConSesiones();
+      this.cargarComputadoresAlan();
       this.cargarHistorial();
     },
 
@@ -43,15 +45,111 @@ document.addEventListener('alpine:init', () => {
       if (equipos && Array.isArray(equipos) && equipos.length > 0) {
         this.computadores = equipos.filter(e => e.estado === 'disponible');
       } else {
-        this.computadores = [
-          { id: 'PC 01', nombre: 'PC 01' },
-          { id: 'PC 02', nombre: 'PC 02' },
-          { id: 'PC 03', nombre: 'PC 03' },
-          { id: 'PC 04', nombre: 'PC 04' },
-          { id: 'PC 05', nombre: 'PC 05' },
-          { id: 'PC 06', nombre: 'PC 06' }
+        const equiposIniciales = [
+          {
+            id: 1,
+            nombre: 'PC 01',
+            estado: 'disponible',
+            ubicacion: 'Sala principal'
+          },
+          {
+            id: 2,
+            nombre: 'PC 02',
+            estado: 'ocupado',
+            ubicacion: 'Sala principal'
+          },
+          {
+            id: 3,
+            nombre: 'PC 03',
+            estado: 'disponible',
+            ubicacion: 'Sala principal'
+          },
+          {
+            id: 4,
+            nombre: 'PC 04',
+            estado: 'fuera-servicio',
+            ubicacion: 'Sala secundaria'
+          },
+          {
+            id: 5,
+            nombre: 'PC 05',
+            estado: 'ocupado',
+            ubicacion: 'Sala secundaria'
+          },
+          {
+            id: 6,
+            nombre: 'PC 06',
+            estado: 'disponible',
+            ubicacion: 'Sala secundaria'
+          }
         ];
+
+        localStorage.setItem(
+          'cybernet_computadores',
+          JSON.stringify(equiposIniciales)
+        );
+
+        this.computadores = equiposIniciales.filter(
+          equipo => equipo.estado === 'disponible'
+        );
       }
+    },
+
+    sincronizarComputadoresConSesiones() {
+      const equipos = JSON.parse(
+        localStorage.getItem('cybernet_computadores')
+      ) || [];
+
+      let huboCambios = false;
+
+      this.sesionesActivas.forEach(sesion => {
+        const equipo = equipos.find(computador =>
+          sesion.computadorId !== undefined
+            ? String(computador.id) === String(sesion.computadorId)
+            : computador.nombre === sesion.computador
+        );
+
+        if (equipo && equipo.estado !== 'ocupado') {
+          equipo.estado = 'ocupado';
+          huboCambios = true;
+        }
+      });
+
+      if (huboCambios) {
+        localStorage.setItem(
+          'cybernet_computadores',
+          JSON.stringify(equipos)
+        );
+      }
+    },
+
+    actualizarEstadoComputador(id, nombre, nuevoEstado) {
+      const equipos = JSON.parse(
+        localStorage.getItem('cybernet_computadores')
+      ) || [];
+
+      const equipo = equipos.find(computador =>
+        id !== undefined && id !== null
+          ? String(computador.id) === String(id)
+          : computador.nombre === nombre
+      );
+
+      if (!equipo) {
+        return false;
+      }
+
+      equipo.estado = nuevoEstado;
+
+      localStorage.setItem(
+        'cybernet_computadores',
+        JSON.stringify(equipos)
+      );
+
+      this.computadores = equipos.filter(
+        computador => computador.estado === 'disponible'
+      );
+
+      return true;
     },
 
     cargarClientes() {
@@ -184,7 +282,7 @@ document.addEventListener('alpine:init', () => {
       const texto = this.busquedaCliente.toLowerCase().trim();
 
       if (texto !== '') {
-        resultado = resultado.filter(c => 
+        resultado = resultado.filter(c =>
           c.id.toLowerCase().includes(texto) ||
           c.nombre.toLowerCase().includes(texto) ||
           c.correo.toLowerCase().includes(texto)
@@ -208,9 +306,35 @@ document.addEventListener('alpine:init', () => {
         return;
       }
 
-      const equipoOcupado = this.sesionesActivas.some(s => s.computador === this.selectComputador);
+      const equiposGuardados = JSON.parse(
+        localStorage.getItem('cybernet_computadores')
+      ) || [];
+
+      const equipoSeleccionado = equiposGuardados.find(
+        equipo => equipo.nombre === this.selectComputador
+      );
+
+      if (
+        !equipoSeleccionado ||
+        equipoSeleccionado.estado !== 'disponible'
+      ) {
+        alert('El computador seleccionado ya no está disponible.');
+        this.selectComputador = '';
+        this.cargarComputadoresAlan();
+        return;
+      }
+
+      const equipoOcupado = this.sesionesActivas.some(
+        sesion =>
+          String(sesion.computadorId) ===
+            String(equipoSeleccionado.id) ||
+          sesion.computador === equipoSeleccionado.nombre
+      );
+
       if (equipoOcupado) {
         alert('Este computador ya tiene una sesión activa.');
+        this.selectComputador = '';
+        this.cargarComputadoresAlan();
         return;
       }
 
@@ -222,9 +346,13 @@ document.addEventListener('alpine:init', () => {
       const nuevaSesion = {
         id: Date.now(),
         cliente: this.selectCliente,
-        computador: this.selectComputador,
+        computadorId: equipoSeleccionado.id,
+        computador: equipoSeleccionado.nombre,
         horaInicio: ahora.getTime(),
-        horaInicioTexto: String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0'),
+        horaInicioTexto:
+          String(ahora.getHours()).padStart(2, '0') +
+          ':' +
+          String(ahora.getMinutes()).padStart(2, '0'),
         fecha: `${anio}-${mes}-${dia}`,
         costosAdicionales: 0
       };
@@ -232,7 +360,17 @@ document.addEventListener('alpine:init', () => {
       this.sesionesActivas.push(nuevaSesion);
       this.guardarSesionesActivas();
 
-      alert(`Sesión iniciada para ${nuevaSesion.cliente} en ${nuevaSesion.computador}`);
+      this.actualizarEstadoComputador(
+        equipoSeleccionado.id,
+        equipoSeleccionado.nombre,
+        'ocupado'
+      );
+
+      alert(
+        `Sesión iniciada para ${nuevaSesion.cliente} ` +
+        `en ${nuevaSesion.computador}`
+      );
+
       this.selectCliente = '';
       this.selectComputador = '';
     },
@@ -274,6 +412,12 @@ document.addEventListener('alpine:init', () => {
 
       this.sesionesActivas = this.sesionesActivas.filter(s => s.id !== sesion.id);
       this.guardarSesionesActivas();
+
+      this.actualizarEstadoComputador(
+        sesion.computadorId,
+        sesion.computador,
+        'disponible'
+      );
 
       alert('Sesión finalizada y guardada en el historial.');
     },

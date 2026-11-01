@@ -199,12 +199,42 @@ function gestionComputadores() {
             this.cancelarFormulario();
         },
 
+        tieneSesionActiva(computador) {
+            const guardadas = localStorage.getItem(
+                "cybernet_sesiones_activas"
+            );
+
+            const sesiones = guardadas
+                ? JSON.parse(guardadas)
+                : [];
+
+            return sesiones.some((sesion) => {
+                const coincideId =
+                    sesion.computadorId !== undefined &&
+                    String(sesion.computadorId) ===
+                        String(computador.id);
+
+                const coincideNombre =
+                    sesion.computador === computador.nombre;
+
+                return coincideId || coincideNombre;
+            });
+        },
+
         editarComputador(id) {
             const computador = this.computadores.find(
                 (computador) => computador.id === id
             );
 
             if (!computador) {
+                return;
+            }
+
+            if (this.tieneSesionActiva(computador)) {
+                alert(
+                    "No puedes editar este computador " +
+                    "mientras tenga una sesión activa."
+                );
                 return;
             }
 
@@ -221,6 +251,14 @@ function gestionComputadores() {
             );
 
             if (!computador) {
+                return;
+            }
+
+            if (this.tieneSesionActiva(computador)) {
+                alert(
+                    "No puedes eliminar este computador " +
+                    "mientras tenga una sesión activa."
+                );
                 return;
             }
 
