@@ -57,58 +57,88 @@
         </header>
 
     <main>
-        <section class="seccion-gestion-computadores">
+        <section class="seccion-gestion-computadores"
+            x-data="gestionComputadores()" x-init="iniciar()">
+
             <div class="encabezado-seccion">
                 <div>
                     <h2>Gestión de computadores</h2>
                     <p>Administra los equipos disponibles en el cibercafé.</p>
                 </div>
 
-                <button type="button" id="boton-agregar-computador">
+                <button type="button" id="boton-agregar-computador"
+                    @click="abrirFormulario()">
                     Agregar computador
                 </button>
             </div>
 
-        <form id="formulario-computador" class="formulario-computador oculto">
-            <h3>Agregar computador</h3>
+            <form id="formulario-computador" class="formulario-computador"
+                x-cloak x-show="formularioVisible"
+                @submit.prevent="guardarComputador()">
 
-            <div class="campo-formulario">
-                <label for="nombre-computador">Nombre del equipo:</label>
-                <input
-                    type="text"
-                    id="nombre-computador"
-                    placeholder="Ejemplo: PC 07"
-                    required
-                >
-            </div>
+                <h3 x-text="idEdicion === null
+                    ? 'Agregar computador'
+                    : 'Editar computador'">
+                </h3>
 
-            <div class="campo-formulario">
-                <label for="estado-computador">Estado:</label>
-                <select id="estado-computador" required>
-                    <option value="disponible">Disponible</option>
+                <div class="campo-formulario">
+                    <label for="nombre-computador">Nombre del equipo:</label>
+                    <input type="text" id="nombre-computador"
+                        placeholder="Ejemplo: PC 07"
+                        x-model="nombre" required>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="estado-computador">Estado:</label>
+                    <select id="estado-computador" x-model="estado" required>
+                        <option value="disponible">Disponible</option>
+                        <option value="ocupado">En uso</option>
+                        <option value="fuera-servicio">
+                            Fuera de servicio
+                        </option>
+                    </select>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="ubicacion-computador">Ubicación:</label>
+                    <select id="ubicacion-computador" x-model="ubicacion" required>
+                        <option value="Sala principal">Sala principal</option>
+                        <option value="Sala secundaria">Sala secundaria</option>
+                    </select>
+                </div>
+
+                <div class="acciones-formulario">
+                    <button type="submit" class="boton-guardar">
+                        <span x-text="idEdicion === null
+                            ? 'Guardar'
+                            : 'Actualizar'">
+                        </span>
+                    </button>
+
+                    <button type="button" class="boton-cancelar"
+                        @click="cancelarFormulario()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+
+            <div class="controles-computadores">
+                <input type="search" placeholder="Buscar por nombre o ubicación"
+                    x-model="busqueda">
+
+                <select x-model="filtroEstado">
+                    <option value="todos">Todos los estados</option>
+                    <option value="disponible">Disponibles</option>
                     <option value="ocupado">En uso</option>
                     <option value="fuera-servicio">Fuera de servicio</option>
                 </select>
-            </div>
 
-            <div class="campo-formulario">
-                <label for="ubicacion-computador">Ubicación:</label>
-                <select id="ubicacion-computador" required>
-                    <option value="Sala principal">Sala principal</option>
-                    <option value="Sala secundaria">Sala secundaria</option>
+                <select x-model="orden">
+                    <option value="nombre-asc">Nombre A-Z</option>
+                    <option value="nombre-desc">Nombre Z-A</option>
+                    <option value="ubicacion">Ubicación</option>
                 </select>
             </div>
-
-            <div class="acciones-formulario">
-                <button type="submit" class="boton-guardar">
-                    Guardar
-                </button>
-
-                <button type="button" id="boton-cancelar" class="boton-cancelar">
-                    Cancelar
-                </button>
-            </div>
-        </form>
 
             <div class="contenedor-tabla">
                 <table class="tabla-computadores">
@@ -121,82 +151,40 @@
                         </tr>
                     </thead>
 
-                    <tbody id="lista-computadores">
-                        <tr>
-                            <td>PC 01</td>
-                            <td>
-                                <span class="punto-estado punto-disponible"></span>
-                                Disponible
-                            </td>
-                            <td>Sala principal</td>
-                            <td>
-                                <button type="button" class="boton-editar">Editar</button>
-                                <button type="button" class="boton-eliminar">Eliminar</button>
-                            </td>
-                        </tr>
+                    <tbody>
+                        <template x-for="computador in computadoresVisibles"
+                            :key="computador.id">
 
-                        <tr>
-                            <td>PC 02</td>
-                            <td>
-                                <span class="punto-estado punto-ocupado"></span>
-                                En uso
-                            </td>
-                            <td>Sala principal</td>
-                            <td>
-                                <button type="button" class="boton-editar">Editar</button>
-                                <button type="button" class="boton-eliminar">Eliminar</button>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td x-text="computador.nombre"></td>
 
-                        <tr>
-                            <td>PC 03</td>
-                            <td>
-                                <span class="punto-estado punto-disponible"></span>
-                                Disponible
-                            </td>
-                            <td>Sala principal</td>
-                            <td>
-                                <button type="button" class="boton-editar">Editar</button>
-                                <button type="button" class="boton-eliminar">Eliminar</button>
-                            </td>
-                        </tr>
+                                <td>
+                                    <span class="punto-estado"
+                                        :class="claseEstado(computador.estado)">
+                                    </span>
 
-                        <tr>
-                            <td>PC 04</td>
-                            <td>
-                                <span class="punto-estado punto-fuera-servicio"></span>
-                                Fuera de servicio
-                            </td>
-                            <td>Sala secundaria</td>
-                            <td>
-                                <button type="button" class="boton-editar">Editar</button>
-                                <button type="button" class="boton-eliminar">Eliminar</button>
-                            </td>
-                        </tr>
+                                    <span x-text="textoEstado(computador.estado)">
+                                    </span>
+                                </td>
 
-                        <tr>
-                            <td>PC 05</td>
-                            <td>
-                                <span class="punto-estado punto-ocupado"></span>
-                                En uso
-                            </td>
-                            <td>Sala secundaria</td>
-                            <td>
-                                <button type="button" class="boton-editar">Editar</button>
-                                <button type="button" class="boton-eliminar">Eliminar</button>
-                            </td>
-                        </tr>
+                                <td x-text="computador.ubicacion"></td>
 
-                        <tr>
-                            <td>PC 06</td>
-                            <td>
-                                <span class="punto-estado punto-disponible"></span>
-                                Disponible
-                            </td>
-                            <td>Sala secundaria</td>
-                            <td>
-                                <button type="button" class="boton-editar">Editar</button>
-                                <button type="button" class="boton-eliminar">Eliminar</button>
+                                <td>
+                                    <button type="button" class="boton-editar"
+                                        @click="editarComputador(computador.id)">
+                                        Editar
+                                    </button>
+
+                                    <button type="button" class="boton-eliminar"
+                                        @click="eliminarComputador(computador.id)">
+                                        Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="computadoresVisibles.length === 0">
+                            <td colspan="4" class="mensaje-sin-resultados">
+                                No se encontraron computadores.
                             </td>
                         </tr>
                     </tbody>
