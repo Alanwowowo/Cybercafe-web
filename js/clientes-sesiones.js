@@ -1,387 +1,310 @@
-let clientes =[
-    {id: "12345678-9", nombre: "Jorge Gonzalez", correo: "jorge@ejemplo.com"},
-    {id: "98765432-1", nombre: "Alvaro Herreros", correo: "alvaro@ejemplo.com"},
-    {id: "32323345-5", nombre: "Pablo Paez", correo: "pablo@ejemplo.com"}
-];
+document.addEventListener('alpine:init', () => {
+  Alpine.data('gestionClientesSesiones', () => ({
+    clientes: [],
+    computadores: [],
+    historial: [],
+    sesionesActivas: [],
+    precioHora: 1500,
 
-let computadores =["PC 01", "PC 02", "PC 03", "PC 04", "PC 05", "PC 06"];
+    clienteForm: { id: '', nombre: '', correo: '' },
+    posicionEdicion: -1,
+    busquedaCliente: '',
+    ordenCliente: 'nombre-asc',
 
-let historial =[
-    {cliente: "Jorge Gonzalez", computador: "PC 01", fecha: "2024-04-15", duracion: "300 min", monto: 10000},
-    {cliente: "Pablo Paez", computador: "PC 06", fecha: "2021-08-29", duracion: "67 min", monto: 2500}
-];
+    selectCliente: '',
+    selectComputador: '',
+    costosAdicionales: 0,
 
-let sesionActiva = null;
-let posicionEdicion = -1;
+    filtroClienteHistorial: '',
+    filtroEquipoHistorial: '',
+    filtroFechaHistorial: '',
+    ordenHistorial: 'fecha-desc',
 
-const clientesGuardados = localStorage.getItem("cybernet_clientes");
-const historialGuardado = localStorage.getItem("cybernet_historial");
-const sesionGuardada = localStorage.getItem("cybernet_sesion_activa");
+    mensajeError: '',
+    mensajeExito: '',
 
-if (clientesGuardados){
-    clientes = JSON.parse(clientesGuardados);
-}
+    init() {
+      this.cargarConfiguracionChris();
+      this.cargarComputadoresAlan();
+      this.cargarClientes();
+      this.cargarSesionesActivas();
+      this.cargarHistorial();
+    },
 
-if (historialGuardado){
-    historial = JSON.parse(historialGuardado);
-}
+    cargarConfiguracionChris() {
+      const config = JSON.parse(localStorage.getItem('cybernet_configuracion'));
+      if (config && config.precioHora) {
+        this.precioHora = Number(config.precioHora);
+      }
+    },
 
-if (sesionGuardada){
-    sesionActiva = JSON.parse(sesionGuardada);
-}
+    cargarComputadoresAlan() {
+      const equipos = JSON.parse(localStorage.getItem('cybernet_computadores'));
+      if (equipos && Array.isArray(equipos) && equipos.length > 0) {
+        this.computadores = equipos.filter(e => e.estado === 'disponible');
+      } else {
+        this.computadores = [
+          { id: 'PC 01', nombre: 'PC 01' },
+          { id: 'PC 02', nombre: 'PC 02' },
+          { id: 'PC 03', nombre: 'PC 03' },
+          { id: 'PC 04', nombre: 'PC 04' },
+          { id: 'PC 05', nombre: 'PC 05' },
+          { id: 'PC 06', nombre: 'PC 06' }
+        ];
+      }
+    },
 
-function guardarClientes(){
-    localStorage.setItem("cybernet_clientes", JSON.stringify(clientes));
-}
+    cargarClientes() {
+      const guardados = localStorage.getItem('cybernet_clientes');
+      if (guardados) {
+        this.clientes = JSON.parse(guardados);
+      } else {
+        this.clientes = [
+          { id: '12345678-9', nombre: 'Jorge Gonzalez', correo: 'jorge@ejemplo.com' },
+          { id: '98765432-1', nombre: 'Alvaro Herreros', correo: 'alvaro@ejemplo.com' },
+          { id: '32323345-5', nombre: 'Pablo Paez', correo: 'pablo@ejemplo.com' }
+        ];
+        this.guardarClientes();
+      }
+    },
 
-function guardarHistorial(){
-    localStorage.setItem("cybernet_historial", JSON.stringify(historial));
-}
+    guardarClientes() {
+      localStorage.setItem('cybernet_clientes', JSON.stringify(this.clientes));
+    },
 
-const formularioCliente = document.getElementById("form-cliente");
-const tablaClientes = document.getElementById("tabla-clientes");
-const buscadorClientes = document.getElementById("buscar-cliente");
+    cargarSesionesActivas() {
+      const guardadas = localStorage.getItem('cybernet_sesiones_activas');
+      if (guardadas) {
+        this.sesionesActivas = JSON.parse(guardadas);
+      } else {
+        this.sesionesActivas = [];
+      }
+    },
 
-function mostrarClientes(lista){
-    if (!tablaClientes){
+    guardarSesionesActivas() {
+      localStorage.setItem('cybernet_sesiones_activas', JSON.stringify(this.sesionesActivas));
+    },
+
+    cargarHistorial() {
+      const guardados = localStorage.getItem('cybernet_historial');
+      if (guardados) {
+        this.historial = JSON.parse(guardados);
+      } else {
+        this.historial = [
+          { cliente: 'Jorge Gonzalez', computador: 'PC 01', fecha: '2024-04-15', duracion: '300 min', monto: 10000 },
+          { cliente: 'Pablo Paez', computador: 'PC 06', fecha: '2021-08-29', duracion: '67 min', monto: 2500 }
+        ];
+        this.guardarHistorial();
+      }
+    },
+
+    guardarHistorial() {
+      localStorage.setItem('cybernet_historial', JSON.stringify(this.historial));
+    },
+
+    guardarCliente() {
+      this.mensajeError = '';
+      this.mensajeExito = '';
+
+      const id = this.clienteForm.id.trim();
+      const nombre = this.clienteForm.nombre.trim();
+      const correo = this.clienteForm.correo.trim();
+
+      if (!id || !nombre || !correo) {
+        this.mensajeError = 'Todos los campos son obligatorios.';
         return;
-    }
+      }
 
-    const cuerpoTabla = tablaClientes.querySelector("tbody");
-    cuerpoTabla.textContent = "";
-
-    for (let i = 0; i < lista.length; i++){
-        const cliente = lista[i];
-        const fila = cuerpoTabla.insertRow();
-
-        const celdaId = fila.insertCell();
-        const celdaNombre = fila.insertCell();
-        const celdaCorreo = fila.insertCell();
-        const celdaAcciones = fila.insertCell();
-
-        celdaId.textContent = cliente.id;
-        celdaNombre.textContent = cliente.nombre;
-        celdaCorreo.textContent = cliente.correo;
-
-        const botonEditar = document.createElement("button");
-        botonEditar.type = "button";
-        botonEditar.textContent = "Editar";
-        botonEditar.classList.add("btn-accion-editar");
-        botonEditar.dataset.idCliente = cliente.id;
-
-        celdaAcciones.appendChild(botonEditar);
-    }
-}
-
-if (tablaClientes){
-    mostrarClientes(clientes);
-
-    tablaClientes.addEventListener("click", function (evento){
-        const elementoPresionado = evento.target;
-
-        if (elementoPresionado.classList.contains("btn-accion-editar")){
-            const idCliente = elementoPresionado.dataset.idCliente;
-
-            for (let i = 0; i < clientes.length; i++){
-                if (clientes[i].id === idCliente) {
-                    document.getElementById("id-cliente").value = clientes[i].id;
-                    document.getElementById("nombre-cliente").value = clientes[i].nombre;
-                    document.getElementById("correo-cliente").value = clientes[i].correo;
-
-                    posicionEdicion = i;
-                    break;
-                }
-            }
-        }
-    });
-}
-
-if (formularioCliente){
-    formularioCliente.addEventListener("submit", function (evento) {
-        evento.preventDefault();
-
-        const id = document.getElementById("id-cliente").value.trim();
-        const nombre = document.getElementById("nombre-cliente").value.trim();
-        const correo = document.getElementById("correo-cliente").value.trim();
-
-        const datosCliente ={
-            id: id,
-            nombre: nombre,
-            correo: correo
-        };
-
-        if (posicionEdicion === -1){
-            clientes.push(datosCliente);
-            alert("Cliente registrado correctamente.");
-        } else{
-            clientes[posicionEdicion] = datosCliente;
-            posicionEdicion = -1;
-            alert("Cliente actualizado correctamente.");
-        }
-
-        guardarClientes();
-        mostrarClientes(clientes);
-        formularioCliente.reset();
-    });
-}
-
-if (buscadorClientes){
-    buscadorClientes.addEventListener("input", function (){
-        const texto = buscadorClientes.value.toLowerCase();
-        const clientesFiltrados =[];
-
-        for (let i = 0; i < clientes.length; i++){
-            const cliente = clientes[i];
-
-            const coincideId = cliente.id.toLowerCase().includes(texto);
-            const coincideNombre = cliente.nombre.toLowerCase().includes(texto);
-            const coincideCorreo = cliente.correo.toLowerCase().includes(texto);
-
-            if (coincideId || coincideNombre || coincideCorreo){
-                clientesFiltrados.push(cliente);
-            }
-        }
-
-        mostrarClientes(clientesFiltrados);
-    });
-}
-
-const selectorCliente = document.getElementById("select-cliente");
-const selectorComputador = document.getElementById("select-computador");
-
-function cargarClientesEnSelect(){
-    if (!selectorCliente){
+      const rutRegex = /^(\d{1,2}\.\d{3}\.\d{3}-[\dkK]|\d{7,8}-[\dkK])$/;
+      if (!rutRegex.test(id)) {
+        this.mensajeError = 'Ingrese un RUT con formato válido (Ej: 12345678-9 o 12.345.678-K).';
         return;
-    }
+      }
 
-    selectorCliente.textContent = "";
-
-    const opcionInicial = document.createElement("option");
-    opcionInicial.value = "";
-    opcionInicial.textContent = "Selecciona un cliente";
-    selectorCliente.appendChild(opcionInicial);
-
-    for (let i = 0; i < clientes.length; i++){
-        const opcion = document.createElement("option");
-        opcion.value = clientes[i].nombre;
-        opcion.textContent = clientes[i].nombre;
-        selectorCliente.appendChild(opcion);
-    }
-}
-
-function cargarComputadoresEnSelect(){
-    if (!selectorComputador){
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(correo)) {
+        this.mensajeError = 'Ingrese un correo electrónico válido.';
         return;
-    }
+      }
 
-    selectorComputador.textContent = "";
-
-    const opcionInicial = document.createElement("option");
-    opcionInicial.value = "";
-    opcionInicial.textContent = "Selecciona un computador";
-    selectorComputador.appendChild(opcionInicial);
-
-    for (let i = 0; i < computadores.length; i++){
-        const opcion = document.createElement("option");
-        opcion.value = computadores[i];
-        opcion.textContent = computadores[i];
-        selectorComputador.appendChild(opcion);
-    }
-}
-
-function obtenerFecha(fecha){
-    const anio = fecha.getFullYear();
-    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
-    const dia = String(fecha.getDate()).padStart(2, "0");
-
-    return anio + "-" + mes + "-" + dia;
-}
-
-function obtenerHora(milisegundos){
-    const fecha = new Date(milisegundos);
-    const hora = String(fecha.getHours()).padStart(2, "0");
-    const minutos = String(fecha.getMinutes()).padStart(2, "0");
-
-    return hora + ":" + minutos;
-}
-
-const formularioInicio = document.getElementById("inicio-sesion");
-const botonFinalizar = document.getElementById("btn-finalizar");
-
-function mostrarSesionActiva(){
-    if (!sesionActiva){
+      const existeId = this.clientes.some((c, idx) => c.id.toLowerCase() === id.toLowerCase() && idx !== this.posicionEdicion);
+      if (existeId) {
+        this.mensajeError = 'Ya existe un cliente con este ID/RUT.';
         return;
-    }
+      }
 
-    const resumenCliente = document.getElementById("resumen-cliente");
+      const existeCorreo = this.clientes.some((c, idx) => c.correo.toLowerCase() === correo.toLowerCase() && idx !== this.posicionEdicion);
+      if (existeCorreo) {
+        this.mensajeError = 'Ya existe un cliente con este correo.';
+        return;
+      }
 
-    if (resumenCliente){
-        resumenCliente.textContent = sesionActiva.cliente;
-        document.getElementById("resumen-computador").textContent = sesionActiva.computador;
-        document.getElementById("resumen-inicio").textContent = obtenerHora(sesionActiva.horaInicio);
-        document.getElementById("resumen-termino").textContent = "En curso";
-        document.getElementById("resumen-duracion").textContent = "En curso";
-        document.getElementById("resumen-costo-tiempo").textContent = "$0";
-        document.getElementById("resumen-costo-extra").textContent = "$0";
-        document.getElementById("resumen-monto-final").textContent = "$0";
-    }
-}
+      const datosCliente = { id, nombre, correo };
 
-if (formularioInicio){
-    cargarClientesEnSelect();
-    cargarComputadoresEnSelect();
-    mostrarSesionActiva();
+      if (this.posicionEdicion === -1) {
+        this.clientes.push(datosCliente);
+        this.mensajeExito = 'Cliente registrado correctamente.';
+      } else {
+        this.clientes[this.posicionEdicion] = datosCliente;
+        this.posicionEdicion = -1;
+        this.mensajeExito = 'Cliente actualizado correctamente.';
+      }
 
-    formularioInicio.addEventListener("submit", function (evento) {
-        evento.preventDefault();
+      this.guardarClientes();
+      this.limpiarFormCliente();
+    },
 
-        if (sesionActiva){
-            alert("Ya existe una sesión activa. Debes finalizarla primero.");
-            return;
+    editarCliente(cliente) {
+      this.mensajeError = '';
+      this.mensajeExito = '';
+      this.posicionEdicion = this.clientes.findIndex(c => c.id === cliente.id);
+      if (this.posicionEdicion !== -1) {
+        this.clienteForm = { ...this.clientes[this.posicionEdicion] };
+      }
+    },
+
+    eliminarCliente(id) {
+      if (confirm('¿Deseas eliminar este cliente?')) {
+        this.clientes = this.clientes.filter(c => String(c.id) !== String(id));
+        this.guardarClientes();
+        if (this.clienteForm.id === id) {
+          this.limpiarFormCliente();
         }
+        this.mensajeExito = 'Cliente eliminado correctamente.';
+      }
+    },
 
-        const ahora = new Date();
+    limpiarFormCliente() {
+      this.clienteForm = { id: '', nombre: '', correo: '' };
+      this.posicionEdicion = -1;
+    },
 
-        sesionActiva ={
-            cliente: selectorCliente.value,
-            computador: selectorComputador.value,
-            horaInicio: ahora.getTime(),
-            fecha: obtenerFecha(ahora)
-        };
+    get clientesFiltrados() {
+      let resultado = [...this.clientes];
+      const texto = this.busquedaCliente.toLowerCase().trim();
 
-        localStorage.setItem(
-            "cybernet_sesion_activa",
-            JSON.stringify(sesionActiva)
+      if (texto !== '') {
+        resultado = resultado.filter(c => 
+          c.id.toLowerCase().includes(texto) ||
+          c.nombre.toLowerCase().includes(texto) ||
+          c.correo.toLowerCase().includes(texto)
         );
+      }
 
-        mostrarSesionActiva();
+      resultado.sort((a, b) => {
+        if (this.ordenCliente === 'nombre-asc') return a.nombre.localeCompare(b.nombre);
+        if (this.ordenCliente === 'nombre-desc') return b.nombre.localeCompare(a.nombre);
+        if (this.ordenCliente === 'id-asc') return a.id.localeCompare(b.id);
+        if (this.ordenCliente === 'id-desc') return b.id.localeCompare(a.id);
+        return 0;
+      });
 
-        alert(
-            "Sesión iniciada para " +
-            sesionActiva.cliente +
-            " en " +
-            sesionActiva.computador
-        );
-    });
-}
+      return resultado;
+    },
 
-if (botonFinalizar){
-    botonFinalizar.addEventListener("click", function () {
-        if (!sesionActiva){
-            alert("Primero debes iniciar una sesión.");
-            return;
-        }
-
-        const confirmarFinalizacion = confirm(
-            "¿Deseas finalizar la sesión de " + sesionActiva.cliente + "?"
-        );
-
-        if (!confirmarFinalizacion){
-            return;
-        }
-
-        const campoExtras = document.getElementById("costos-adicionales");
-        let costosExtras = parseInt(campoExtras.value);
-
-        if (isNaN(costosExtras)){
-            costosExtras = 0;
-        }
-
-        const horaTermino = new Date().getTime();
-        let duracion = Math.ceil(
-            (horaTermino - sesionActiva.horaInicio) / 60000
-        );
-
-        if (duracion < 1){
-            duracion = 1;
-        }
-
-        const tarifaPorMinuto = 25;
-        const costoTiempo = duracion * tarifaPorMinuto;
-        const montoFinal = costoTiempo + costosExtras;
-
-        document.getElementById("resumen-cliente").textContent = sesionActiva.cliente;
-        document.getElementById("resumen-computador").textContent = sesionActiva.computador;
-        document.getElementById("resumen-inicio").textContent = obtenerHora(sesionActiva.horaInicio);
-        document.getElementById("resumen-termino").textContent = obtenerHora(horaTermino);
-        document.getElementById("resumen-duracion").textContent = duracion + " min";
-        document.getElementById("resumen-costo-tiempo").textContent = "$" + costoTiempo;
-        document.getElementById("resumen-costo-extra").textContent = "$" + costosExtras;
-        document.getElementById("resumen-monto-final").textContent = "$" + montoFinal;
-
-        const nuevaSesion ={
-            cliente: sesionActiva.cliente,
-            computador: sesionActiva.computador,
-            fecha: sesionActiva.fecha,
-            duracion: duracion + " min",
-            monto: montoFinal
-        };
-
-        historial.push(nuevaSesion);
-        guardarHistorial();
-
-        localStorage.removeItem("cybernet_sesion_activa");
-        sesionActiva = null;
-        campoExtras.value = "0";
-    });
-}
-
-const cuerpoHistorial = document.getElementById("tabla-body-historial");
-const filtroCliente = document.getElementById("filtro-cliente");
-const filtroEquipo = document.getElementById("filtro-equipo");
-const filtroFecha = document.getElementById("filtro-fecha");
-
-function mostrarHistorial(lista){
-    if (!cuerpoHistorial){
+    iniciarSesion() {
+      if (!this.selectCliente || !this.selectComputador) {
+        alert('Selecciona un cliente y un computador.');
         return;
+      }
+
+      const equipoOcupado = this.sesionesActivas.some(s => s.computador === this.selectComputador);
+      if (equipoOcupado) {
+        alert('Este computador ya tiene una sesión activa.');
+        return;
+      }
+
+      const ahora = new Date();
+      const anio = ahora.getFullYear();
+      const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+      const dia = String(ahora.getDate()).padStart(2, '0');
+
+      const nuevaSesion = {
+        id: Date.now(),
+        cliente: this.selectCliente,
+        computador: this.selectComputador,
+        horaInicio: ahora.getTime(),
+        horaInicioTexto: String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0'),
+        fecha: `${anio}-${mes}-${dia}`,
+        costosAdicionales: 0
+      };
+
+      this.sesionesActivas.push(nuevaSesion);
+      this.guardarSesionesActivas();
+
+      alert(`Sesión iniciada para ${nuevaSesion.cliente} en ${nuevaSesion.computador}`);
+      this.selectCliente = '';
+      this.selectComputador = '';
+    },
+
+    finalizarSesion(sesionAProcesar) {
+      let sesion = sesionAProcesar;
+      if (!sesion && this.sesionesActivas.length > 0) {
+        sesion = this.sesionesActivas[0];
+      }
+
+      if (!sesion) {
+        alert('No hay ninguna sesión activa para finalizar.');
+        return;
+      }
+
+      if (!confirm(`¿Deseas finalizar la sesión de ${sesion.cliente}?`)) {
+        return;
+      }
+
+      const horaTermino = new Date().getTime();
+      let duracion = Math.ceil((horaTermino - sesion.horaInicio) / 60000);
+      if (duracion < 1) duracion = 1;
+
+      const tarifaPorMinuto = this.precioHora / 60;
+      const costoTiempo = Math.round(duracion * tarifaPorMinuto);
+      const extras = Number(sesion.costosAdicionales) || 0;
+      const montoFinal = costoTiempo + extras;
+
+      const registroHistorial = {
+        cliente: sesion.cliente,
+        computador: sesion.computador,
+        fecha: sesion.fecha,
+        duracion: duracion + ' min',
+        monto: montoFinal
+      };
+
+      this.historial.push(registroHistorial);
+      this.guardarHistorial();
+
+      this.sesionesActivas = this.sesionesActivas.filter(s => s.id !== sesion.id);
+      this.guardarSesionesActivas();
+
+      alert('Sesión finalizada y guardada en el historial.');
+    },
+
+    get historialFiltrado() {
+      let resultado = [...this.historial];
+      const clienteBuscado = this.filtroClienteHistorial.toLowerCase().trim();
+      const equipoBuscado = this.filtroEquipoHistorial.toLowerCase().trim();
+      const fechaBuscada = this.filtroFechaHistorial;
+
+      if (clienteBuscado) {
+        resultado = resultado.filter(s => s.cliente.toLowerCase().includes(clienteBuscado));
+      }
+
+      if (equipoBuscado) {
+        resultado = resultado.filter(s => s.computador.toLowerCase().includes(equipoBuscado));
+      }
+
+      if (fechaBuscada) {
+        resultado = resultado.filter(s => s.fecha === fechaBuscada);
+      }
+
+      resultado.sort((a, b) => {
+        if (this.ordenHistorial === 'fecha-desc') return b.fecha.localeCompare(a.fecha);
+        if (this.ordenHistorial === 'fecha-asc') return a.fecha.localeCompare(b.fecha);
+        if (this.ordenHistorial === 'monto-desc') return b.monto - a.monto;
+        if (this.ordenHistorial === 'monto-asc') return a.monto - b.monto;
+        return 0;
+      });
+
+      return resultado;
     }
-
-    cuerpoHistorial.textContent = "";
-
-    for (let i = 0; i < lista.length; i++){
-        const sesion = lista[i];
-        const fila = cuerpoHistorial.insertRow();
-
-        fila.insertCell().textContent = sesion.cliente;
-        fila.insertCell().textContent = sesion.computador;
-        fila.insertCell().textContent = sesion.fecha;
-        fila.insertCell().textContent = sesion.duracion;
-        fila.insertCell().textContent = "$" + sesion.monto;
-    }
-}
-
-function aplicarFiltrosHistorial(){
-    const sesionesFiltradas = [];
-    const clienteBuscado = filtroCliente.value.toLowerCase();
-    const equipoBuscado = filtroEquipo.value.toLowerCase();
-    const fechaBuscada = filtroFecha.value;
-
-    for (let i = 0; i < historial.length; i++){
-        const sesion = historial[i];
-
-        const coincideCliente = sesion.cliente
-            .toLowerCase()
-            .includes(clienteBuscado);
-
-        const coincideEquipo = sesion.computador
-            .toLowerCase()
-            .includes(equipoBuscado);
-
-        const coincideFecha =
-            fechaBuscada === "" || sesion.fecha === fechaBuscada;
-
-        if (coincideCliente && coincideEquipo && coincideFecha){
-            sesionesFiltradas.push(sesion);
-        }
-    }
-
-    mostrarHistorial(sesionesFiltradas);
-}
-
-if (cuerpoHistorial){
-    mostrarHistorial(historial);
-
-    filtroCliente.addEventListener("input", aplicarFiltrosHistorial);
-    filtroEquipo.addEventListener("input", aplicarFiltrosHistorial);
-    filtroFecha.addEventListener("change", aplicarFiltrosHistorial);
-}
+  }));
+});

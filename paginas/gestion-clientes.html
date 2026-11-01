@@ -50,7 +50,7 @@
         </div>
     </aside>
 
-    <div class="contenido-pagina">
+    <div class="contenido-pagina" x-data="gestionClientesSesiones">
         <header>
             <h1>Gestión de clientes</h1>
             <p>Sistema de gestión del cibercafé</p>
@@ -58,31 +58,43 @@
 
         <main>
             <section>
-                <h3>Registrar nuevo cliente</h3>
+                <h3 x-text="posicionEdicion === -1 ? 'Registrar nuevo cliente' : 'Editar cliente'"></h3>
 
-                <form id="form-cliente">
+                <form id="form-cliente" @submit.prevent="guardarCliente()">
                     <div>
                         <label for="id-cliente">ID / RUT:</label>
-                        <input type="text" id="id-cliente" required placeholder="12.345.678-9">
+                        <input type="text" id="id-cliente" x-model="clienteForm.id" placeholder="12.345.678-9">
                     </div>
 
                     <div>
                         <label for="nombre-cliente">Nombre y Apellido:</label>
-                        <input type="text" id="nombre-cliente" required placeholder="Nombre">
+                        <input type="text" id="nombre-cliente" x-model="clienteForm.nombre" placeholder="Nombre">
                     </div>
 
                     <div>
                         <label for="correo-cliente">Email:</label>
-                        <input type="email" id="correo-cliente" required placeholder="correo@ejemplo.com">
+                        <input type="email" id="correo-cliente" x-model="clienteForm.correo" placeholder="correo@ejemplo.com">
                     </div>
 
-                    <button type="submit">Registrar Cliente</button>
+                    <button type="submit" x-text="posicionEdicion === -1 ? 'Registrar Cliente' : 'Guardar Cambios'"></button>
+                    <button type="button" x-show="posicionEdicion !== -1" @click="limpiarFormCliente()">Cancelar</button>
                 </form>
+
+                <p x-show="mensajeError" x-text="mensajeError" style="color: red; margin-top: 10px;"></p>
+                <p x-show="mensajeExito" x-text="mensajeExito" style="color: green; margin-top: 10px;"></p>
             </section>
 
             <section>
-                <h3>Buscar clientes</h3>
-                <input type="text" id="buscar-cliente" placeholder="ID, nombre o email">
+                <h3>Buscar y ordenar clientes</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="buscar-cliente" x-model="busquedaCliente" placeholder="ID, nombre o email">
+                    <select x-model="ordenCliente">
+                        <option value="nombre-asc">Nombre (A-Z)</option>
+                        <option value="nombre-desc">Nombre (Z-A)</option>
+                        <option value="id-asc">ID (Ascendente)</option>
+                        <option value="id-desc">ID (Descendente)</option>
+                    </select>
+                </div>
             </section>
 
             <section>
@@ -98,7 +110,22 @@
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                            <template x-for="cliente in clientesFiltrados" :key="cliente.id">
+                                <tr>
+                                    <td x-text="cliente.id"></td>
+                                    <td x-text="cliente.nombre"></td>
+                                    <td x-text="cliente.correo"></td>
+                                    <td>
+                                        <button type="button" @click="editarCliente(cliente)">Editar</button>
+                                        <button type="button" @click="eliminarCliente(cliente.id)">Eliminar</button>
+                                    </td>
+                                </tr>
+                            </template>
+                            <tr x-show="clientesFiltrados.length === 0">
+                                <td colspan="4" style="text-align: center;">No se encontraron clientes registrados.</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </section>
