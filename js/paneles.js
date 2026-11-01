@@ -26,7 +26,7 @@ function inicializarDatos() {
                 {
                     id: 2,
                     nombre: "PC 02",
-                    estado: "ocupado",
+                    estado: "disponible",
                     ubicacion: "Sala principal"
                 },
                 {
@@ -44,7 +44,7 @@ function inicializarDatos() {
                 {
                     id: 5,
                     nombre: "PC 05",
-                    estado: "ocupado",
+                    estado: "disponible",
                     ubicacion: "Sala secundaria"
                 },
                 {
@@ -162,12 +162,14 @@ if (formularioLogin) {
             contrasenaIngresada === "admin123"
         ) {
             sessionStorage.setItem("rol", "administrador");
+            sessionStorage.setItem("cuentaId", "1");
             window.location.href = "paginas/inicio-admin.html";
         } else if (
             correoIngresado === "elianny.ortega@cybernet.com" &&
             contrasenaIngresada === "encargado123"
         ) {
             sessionStorage.setItem("rol", "encargado");
+            sessionStorage.setItem("cuentaId", "2");
             window.location.href = "paginas/inicio-encargado.html";
         } else {
             alert("Correo o contraseña incorrectos.");

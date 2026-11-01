@@ -25,6 +25,21 @@
         enlaceAdministrador.parentElement.style.display = "none";
     }
 
+    // Ocultar las funciones exclusivas del administrador
+    if (rolUsuario === "encargado") {
+        const enlacesGestionCuentas = document.querySelectorAll(
+            'a[href="gestion-cuentas.html"]'
+        );
+
+        enlacesGestionCuentas.forEach(function (enlace) {
+            const elementoMenu = enlace.closest("li");
+
+            if (elementoMenu) {
+                elementoMenu.style.display = "none";
+            }
+        });
+    }
+
     // 3. Restricción por rol (solo se evalúa si YA hay una sesión activa)
     if (
         paginaActual.endsWith("/inicio-admin.html") &&
@@ -42,6 +57,15 @@
         return;
     }
 
+    // Impedir que el encargado entre escribiendo directamente la dirección
+    if (
+        paginaActual.endsWith("/gestion-cuentas.html") &&
+        rolUsuario !== "administrador"
+    ) {
+        window.location.replace("inicio-encargado.html");
+        return;
+    }
+
     // 4. Cierre de sesión para cualquier página interna
     const enlaceCerrarSesion = document.querySelector(
         'a[href="../index.html"]'
@@ -49,7 +73,7 @@
 
     if (enlaceCerrarSesion) {
         enlaceCerrarSesion.addEventListener("click", function () {
-            sessionStorage.removeItem("rol");
+            sessionStorage.removeItem("cuentaId");
         });
     }
 })();

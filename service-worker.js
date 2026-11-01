@@ -1,4 +1,4 @@
-const nombreCache = "cybernet-v4";
+const nombreCache = "cybernet-v5";
 
 const archivosCache = [
     "/",
