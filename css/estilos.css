@@ -104,3 +104,487 @@ footer p{
     margin: 0;
     font-size: 0.85rem;
 }
+
+/* ==================================================
+   TEMA NEON GAMING - SOLO CAMBIOS VISUALES
+   ================================================== */
+
+:root {
+    --neon-fondo: #050510;
+    --neon-superficie: rgba(15, 15, 35, 0.92);
+    --neon-superficie-clara: rgba(27, 27, 58, 0.92);
+    --neon-morado: #9d4edd;
+    --neon-violeta: #c77dff;
+    --neon-cian: #00e5ff;
+    --neon-azul: #4361ee;
+    --neon-verde: #39ff88;
+    --neon-rojo: #ff3d71;
+    --neon-texto: #f4f1ff;
+    --neon-secundario: #aaa6c3;
+    --neon-borde: rgba(157, 78, 221, 0.55);
+    --neon-sombra: 0 0 18px rgba(157, 78, 221, 0.22);
+}
+
+html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+}
+
+body {
+    color: var(--neon-texto) !important;
+    font-family: "Segoe UI", Arial, sans-serif !important;
+    background:
+        radial-gradient(circle at 15% 10%, rgba(157, 78, 221, 0.18), transparent 28%),
+        radial-gradient(circle at 85% 85%, rgba(0, 229, 255, 0.12), transparent 30%),
+        linear-gradient(135deg, #04040c 0%, #080816 45%, #050510 100%) !important;
+    background-attachment: fixed !important;
+}
+
+::selection {
+    color: #ffffff;
+    background-color: var(--neon-morado);
+}
+
+/* Encabezado y pie de página */
+
+header {
+    background: linear-gradient(
+        90deg,
+        rgba(8, 8, 24, 0.98),
+        rgba(25, 12, 48, 0.96)
+    ) !important;
+    border-bottom: 1px solid var(--neon-cian) !important;
+    box-shadow:
+        0 3px 20px rgba(0, 229, 255, 0.12),
+        0 3px 28px rgba(157, 78, 221, 0.16) !important;
+}
+
+header h1,
+.sidebar-logo h1 {
+    color: var(--neon-cian) !important;
+    letter-spacing: 1px;
+    text-shadow:
+        0 0 8px rgba(0, 229, 255, 0.7),
+        0 0 20px rgba(0, 229, 255, 0.25);
+}
+
+header p,
+header h4,
+footer,
+footer p {
+    color: var(--neon-secundario) !important;
+}
+
+footer {
+    background: rgba(7, 7, 22, 0.96) !important;
+    border-top: 1px solid var(--neon-borde) !important;
+    box-shadow: 0 -5px 22px rgba(157, 78, 221, 0.1);
+}
+
+/* Títulos */
+
+h2,
+section h3,
+.titulo-resumen,
+.tarjeta-equipo h3 {
+    color: var(--neon-violeta) !important;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 12px rgba(199, 125, 255, 0.25);
+}
+
+/* Secciones, formularios y tarjetas */
+
+section,
+.login-card,
+.tarjeta-metrica,
+.tarjeta-admin,
+.tarjeta-equipo,
+.formulario-computador,
+.formulario-cuenta,
+.leyenda-estados,
+#detalle-resumen {
+    background: linear-gradient(
+        145deg,
+        rgba(20, 20, 47, 0.94),
+        rgba(10, 10, 27, 0.96)
+    ) !important;
+    border-color: var(--neon-borde) !important;
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.34),
+        var(--neon-sombra) !important;
+    backdrop-filter: blur(8px);
+}
+
+section {
+    border-left: 4px solid var(--neon-morado) !important;
+}
+
+.login-card {
+    border: 1px solid rgba(0, 229, 255, 0.55) !important;
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.48),
+        0 0 30px rgba(0, 229, 255, 0.1),
+        0 0 25px rgba(157, 78, 221, 0.16) !important;
+}
+
+.tarjeta-metrica,
+.tarjeta-admin,
+.tarjeta-equipo,
+.tarjeta-boton {
+    transition:
+        transform 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease !important;
+}
+
+.tarjeta-metrica:hover,
+.tarjeta-admin:hover,
+.tarjeta-equipo:hover,
+.tarjeta-boton:hover {
+    transform: translateY(-5px);
+    border-color: var(--neon-cian) !important;
+    box-shadow:
+        0 16px 32px rgba(0, 0, 0, 0.42),
+        0 0 20px rgba(0, 229, 255, 0.22),
+        0 0 28px rgba(157, 78, 221, 0.18) !important;
+}
+
+.tarjeta-metrica .valor,
+.tarjeta-metrica p {
+    color: var(--neon-cian) !important;
+    text-shadow: 0 0 15px rgba(0, 229, 255, 0.42) !important;
+}
+
+/* Barra lateral */
+
+.sidebar {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(14, 8, 32, 0.99),
+            rgba(5, 5, 18, 0.99)
+        ) !important;
+    border-right: 1px solid var(--neon-morado) !important;
+    box-shadow:
+        7px 0 28px rgba(0, 0, 0, 0.4),
+        4px 0 25px rgba(157, 78, 221, 0.15);
+}
+
+.sidebar-logo {
+    border-bottom-color: var(--neon-borde) !important;
+}
+
+.sidebar-logo p,
+.sidebar nav a {
+    color: var(--neon-secundario) !important;
+}
+
+.sidebar nav a {
+    border: 1px solid transparent;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+.sidebar nav a:hover {
+    color: #ffffff !important;
+    background: rgba(157, 78, 221, 0.16) !important;
+    border-color: rgba(199, 125, 255, 0.4);
+    box-shadow: inset 3px 0 0 var(--neon-cian);
+}
+
+.sidebar nav a.active {
+    color: #ffffff !important;
+    background: linear-gradient(
+        90deg,
+        rgba(157, 78, 221, 0.85),
+        rgba(67, 97, 238, 0.75)
+    ) !important;
+    border-color: var(--neon-cian);
+    box-shadow:
+        0 0 15px rgba(157, 78, 221, 0.35),
+        inset 3px 0 0 var(--neon-cian);
+}
+
+.sidebar-cerrar {
+    border-top-color: var(--neon-borde) !important;
+}
+
+.sidebar-cerrar a:hover {
+    background: rgba(255, 61, 113, 0.17) !important;
+    box-shadow: inset 3px 0 0 var(--neon-rojo);
+}
+
+/* Campos y controles */
+
+input,
+select,
+textarea {
+    color: var(--neon-texto) !important;
+    background: rgba(5, 5, 18, 0.88) !important;
+    border: 1px solid rgba(157, 78, 221, 0.62) !important;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.35);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #77738f !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none !important;
+    border-color: var(--neon-cian) !important;
+    background: rgba(8, 12, 28, 0.96) !important;
+    box-shadow:
+        0 0 0 2px rgba(0, 229, 255, 0.1),
+        0 0 16px rgba(0, 229, 255, 0.22) !important;
+}
+
+label {
+    color: #c7c3db !important;
+}
+
+/* Botones principales */
+
+button:not(.boton-menu),
+.button-login,
+.btn-primario,
+#boton-agregar-computador,
+#boton-agregar-cuenta,
+.boton-editar,
+.boton-editar-cuenta {
+    color: #ffffff !important;
+    background: linear-gradient(
+        135deg,
+        var(--neon-morado),
+        var(--neon-azul)
+    ) !important;
+    border: 1px solid rgba(199, 125, 255, 0.62) !important;
+    box-shadow:
+        0 0 12px rgba(157, 78, 221, 0.25),
+        inset 0 0 10px rgba(255, 255, 255, 0.05);
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease !important;
+}
+
+button:not(.boton-menu):hover,
+.button-login:hover,
+.btn-primario:hover,
+#boton-agregar-computador:hover,
+#boton-agregar-cuenta:hover,
+.boton-editar:hover,
+.boton-editar-cuenta:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+    box-shadow:
+        0 0 18px rgba(157, 78, 221, 0.48),
+        0 0 12px rgba(0, 229, 255, 0.2) !important;
+}
+
+.boton-guardar {
+    background: linear-gradient(135deg, #079455, #22c55e) !important;
+    border-color: var(--neon-verde) !important;
+    box-shadow: 0 0 12px rgba(57, 255, 136, 0.22) !important;
+}
+
+.boton-cancelar {
+    background: linear-gradient(135deg, #4b5563, #6b7280) !important;
+    border-color: #9ca3af !important;
+}
+
+.boton-eliminar,
+.boton-eliminar-cuenta,
+#btn-finalizar {
+    background: linear-gradient(135deg, #be123c, var(--neon-rojo)) !important;
+    border-color: #ff7597 !important;
+    box-shadow: 0 0 12px rgba(255, 61, 113, 0.22) !important;
+}
+
+.btn-accion-historial {
+    background: linear-gradient(135deg, #0891b2, var(--neon-cian)) !important;
+    color: #031116 !important;
+    border-color: var(--neon-cian) !important;
+}
+
+.boton-menu {
+    background: linear-gradient(
+        135deg,
+        var(--neon-morado),
+        var(--neon-azul)
+    ) !important;
+    border: 1px solid var(--neon-cian) !important;
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.25);
+}
+
+/* Tablas */
+
+table,
+.tabla-computadores,
+.tabla-cuentas {
+    background: rgba(8, 8, 24, 0.72) !important;
+    border: 1px solid var(--neon-borde);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table th,
+.tabla-computadores th,
+.tabla-cuentas th {
+    color: var(--neon-cian) !important;
+    background: linear-gradient(
+        90deg,
+        rgba(41, 19, 77, 0.96),
+        rgba(13, 28, 61, 0.96)
+    ) !important;
+    border-bottom-color: var(--neon-morado) !important;
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.25);
+}
+
+table td,
+.tabla-computadores td,
+.tabla-cuentas td {
+    color: var(--neon-texto) !important;
+    border-bottom-color: rgba(157, 78, 221, 0.23) !important;
+}
+
+table tbody tr,
+.tabla-computadores tbody tr,
+.tabla-cuentas tbody tr {
+    transition:
+        background-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+table tbody tr:hover,
+.tabla-computadores tbody tr:hover,
+.tabla-cuentas tbody tr:hover {
+    background: rgba(157, 78, 221, 0.13) !important;
+    box-shadow: inset 3px 0 0 var(--neon-cian);
+}
+
+/* Estados */
+
+.punto-estado {
+    box-shadow: 0 0 10px currentColor;
+}
+
+.punto-disponible,
+.punto-activa {
+    background-color: var(--neon-verde) !important;
+    box-shadow: 0 0 11px rgba(57, 255, 136, 0.75);
+}
+
+.punto-ocupado {
+    background-color: #ffd43b !important;
+    box-shadow: 0 0 11px rgba(255, 212, 59, 0.75);
+}
+
+.punto-fuera-servicio,
+.punto-inactiva {
+    background-color: var(--neon-rojo) !important;
+    box-shadow: 0 0 11px rgba(255, 61, 113, 0.75);
+}
+
+/* Accesibilidad visual */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--neon-cian) !important;
+    outline-offset: 3px;
+}
+
+/* Barra de desplazamiento */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--neon-morado) var(--neon-fondo);
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--neon-fondo);
+}
+
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        var(--neon-morado),
+        var(--neon-cian)
+    );
+    border: 2px solid var(--neon-fondo);
+    border-radius: 10px;
+}
+
+/* Animación sutil del logo */
+
+@keyframes brilloLogo {
+    from {
+        text-shadow:
+            0 0 7px rgba(0, 229, 255, 0.55),
+            0 0 15px rgba(0, 229, 255, 0.18);
+    }
+
+    to {
+        text-shadow:
+            0 0 11px rgba(0, 229, 255, 0.9),
+            0 0 25px rgba(157, 78, 221, 0.35);
+    }
+}
+
+header h1,
+.sidebar-logo h1 {
+    animation: brilloLogo 2.4s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media (max-width: 600px) {
+    section,
+    .login-card {
+        box-shadow:
+            0 10px 24px rgba(0, 0, 0, 0.4),
+            0 0 16px rgba(157, 78, 221, 0.13) !important;
+    }
+
+    .tarjeta-metrica:hover,
+    .tarjeta-admin:hover,
+    .tarjeta-equipo:hover {
+        transform: none;
+    }
+}
+
+button.boton-guardar {
+    background: linear-gradient(135deg, #079455, #22c55e) !important;
+    border-color: #39ff88 !important;
+    box-shadow: 0 0 12px rgba(57, 255, 136, 0.22) !important;
+}
+
+button.boton-cancelar {
+    background: linear-gradient(135deg, #374151, #6b7280) !important;
+    border-color: #9ca3af !important;
+    box-shadow: none !important;
+}
