@@ -1,43 +1,55 @@
-const rolUsuario = localStorage.getItem("rol-cybernet");
+(function () {
+    const rolUsuario = sessionStorage.getItem("rol");
+    const paginaActual = window.location.pathname;
 
-const enlaceAdministrador = document.querySelector(
-    'a[href="inicio-admin.html"]'
-);
+    // 1. Si no hay sesión iniciada, redirigir al login y detener la ejecución
+    if (!rolUsuario) {
+        window.location.replace("../index.html");
+        return;
+    }
 
-const enlaceEncargado = document.querySelector(
-    'a[href="inicio-encargado.html"]'
-);
+    // 2. Ocultar enlaces del menú según el rol
+    const enlaceAdministrador = document.querySelector(
+        'a[href="inicio-admin.html"]'
+    );
 
-if (rolUsuario === "administrador" && enlaceEncargado) {
-    enlaceEncargado.parentElement.style.display = "none";
-}
+    const enlaceEncargado = document.querySelector(
+        'a[href="inicio-encargado.html"]'
+    );
 
-if (rolUsuario === "encargado" && enlaceAdministrador) {
-    enlaceAdministrador.parentElement.style.display = "none";
-}
+    if (rolUsuario === "administrador" && enlaceEncargado) {
+        enlaceEncargado.parentElement.style.display = "none";
+    }
 
-const paginaActual = window.location.pathname;
+    if (rolUsuario === "encargado" && enlaceAdministrador) {
+        enlaceAdministrador.parentElement.style.display = "none";
+    }
 
-if (
-    paginaActual.endsWith("/inicio-admin.html") &&
-    rolUsuario !== "administrador"
-) {
-    window.location.href = "../index.html";
-}
+    // 3. Restricción por rol (solo se evalúa si YA hay una sesión activa)
+    if (
+        paginaActual.endsWith("/inicio-admin.html") &&
+        rolUsuario !== "administrador"
+    ) {
+        window.location.replace("inicio-encargado.html");
+        return;
+    }
 
-if (
-    paginaActual.endsWith("/inicio-encargado.html") &&
-    rolUsuario !== "encargado"
-) {
-    window.location.href = "../index.html";
-}
+    if (
+        paginaActual.endsWith("/inicio-encargado.html") &&
+        rolUsuario !== "encargado"
+    ) {
+        window.location.replace("inicio-admin.html");
+        return;
+    }
 
-const enlaceCerrarSesion = document.querySelector(
-    'a[href="../index.html"]'
-);
+    // 4. Cierre de sesión para cualquier página interna
+    const enlaceCerrarSesion = document.querySelector(
+        'a[href="../index.html"]'
+    );
 
-if (enlaceCerrarSesion) {
-    enlaceCerrarSesion.addEventListener("click", function () {
-        localStorage.removeItem("rol-cybernet");
-    });
-}
+    if (enlaceCerrarSesion) {
+        enlaceCerrarSesion.addEventListener("click", function () {
+            sessionStorage.removeItem("rol");
+        });
+    }
+})();
