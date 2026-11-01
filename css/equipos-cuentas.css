@@ -335,3 +335,52 @@
 .formulario-cuenta.oculto {
     display: none;
 }
+
+.controles-computadores {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.controles-computadores input,
+.controles-computadores select {
+    padding: 10px;
+    color: white;
+    background-color: #1c1c2b;
+    border: 1px solid #8b5cf6;
+    border-radius: 5px;
+}
+
+.mensaje-sin-resultados {
+    text-align: center;
+    color: #c4b5fd;
+}
+
+@media (max-width: 700px) {
+    .controles-computadores {
+        grid-template-columns: 1fr;
+    }
+}
+
+.controles-cuentas {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.controles-cuentas input,
+.controles-cuentas select {
+    padding: 10px;
+    color: white;
+    background-color: #1c1c2b;
+    border: 1px solid #8b5cf6;
+    border-radius: 5px;
+}
+
+@media (max-width: 800px) {
+    .controles-cuentas {
+        grid-template-columns: 1fr;
+    }
+}

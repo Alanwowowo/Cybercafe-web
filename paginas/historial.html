@@ -50,7 +50,7 @@
         </div>
     </aside>
 
-    <div class="contenido-pagina">
+    <div class="contenido-pagina" x-data="gestionClientesSesiones">
         <header>
             <h1>Historial de sesiones</h1>
             <p>Sistema de gestión del cibercafé</p>
@@ -58,22 +58,32 @@
 
         <main>
             <section>
-                <h3>Filtrar registros</h3>
+                <h3>Filtrar y ordenar registros</h3>
 
                 <div id="filtros-historial">
                     <div>
                         <label for="filtro-cliente">Buscar por cliente:</label>
-                        <input type="text" id="filtro-cliente" placeholder="Nombre">
+                        <input type="text" id="filtro-cliente" x-model="filtroClienteHistorial" placeholder="Nombre">
                     </div>
 
                     <div>
                         <label for="filtro-equipo">Buscar por equipo:</label>
-                        <input type="text" id="filtro-equipo" placeholder="PC 01">
+                        <input type="text" id="filtro-equipo" x-model="filtroEquipoHistorial" placeholder="PC 01">
                     </div>
 
                     <div>
                         <label for="filtro-fecha">Buscar por fecha:</label>
-                        <input type="date" id="filtro-fecha">
+                        <input type="date" id="filtro-fecha" x-model="filtroFechaHistorial">
+                    </div>
+
+                    <div>
+                        <label for="orden-historial">Ordenar por:</label>
+                        <select id="orden-historial" x-model="ordenHistorial">
+                            <option value="fecha-desc">Fecha (Más reciente primero)</option>
+                            <option value="fecha-asc">Fecha (Más antigua primero)</option>
+                            <option value="monto-desc">Monto (Mayor a menor)</option>
+                            <option value="monto-asc">Monto (Menor a mayor)</option>
+                        </select>
                     </div>
                 </div>
             </section>
@@ -93,7 +103,20 @@
                             </tr>
                         </thead>
 
-                        <tbody id="tabla-body-historial"></tbody>
+                        <tbody id="tabla-body-historial">
+                            <template x-for="(sesion, index) in historialFiltrado" :key="index">
+                                <tr>
+                                    <td x-text="sesion.cliente"></td>
+                                    <td x-text="sesion.computador"></td>
+                                    <td x-text="sesion.fecha"></td>
+                                    <td x-text="sesion.duracion"></td>
+                                    <td x-text="'$' + sesion.monto"></td>
+                                </tr>
+                            </template>
+                            <tr x-show="historialFiltrado.length === 0">
+                                <td colspan="5" style="text-align: center;">No se encontraron registros de sesiones.</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </section>

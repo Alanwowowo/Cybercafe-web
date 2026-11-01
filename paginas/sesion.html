@@ -50,7 +50,7 @@
         </div>
     </aside>
 
-    <div class="contenido-pagina">
+    <div class="contenido-pagina" x-data="gestionClientesSesiones">
         <header>
             <h1>Registro y cierre de sesión</h1>
             <p>Sistema de gestión del cibercafé</p>
@@ -60,18 +60,24 @@
             <section>
                 <h3>Iniciar nueva sesión</h3>
 
-                <form id="inicio-sesion">
+                <form id="inicio-sesion" @submit.prevent="iniciarSesion()">
                     <div>
                         <label for="select-cliente">Cliente:</label>
-                        <select id="select-cliente" required>
+                        <select id="select-cliente" x-model="selectCliente" required>
                             <option value="">Selecciona un cliente</option>
+                            <template x-for="cliente in clientes" :key="cliente.id">
+                                <option :value="cliente.nombre" x-text="cliente.nombre"></option>
+                            </template>
                         </select>
                     </div>
 
                     <div>
                         <label for="select-computador">Computador:</label>
-                        <select id="select-computador" required>
+                        <select id="select-computador" x-model="selectComputador" required>
                             <option value="">Selecciona un computador</option>
+                            <template x-for="equipo in computadores" :key="equipo.id || equipo">
+                                <option :value="equipo.nombre || equipo" x-text="equipo.nombre || equipo"></option>
+                            </template>
                         </select>
                     </div>
 
@@ -80,34 +86,29 @@
             </section>
 
             <section>
-                <h3>Finalizar sesión</h3>
+                <h3>Sesiones activas</h3>
 
-                <form id="cierre-sesion">
-                    <div>
-                        <label for="costos-adicionales">Costos extras ($):</label>
-                        <input type="number" id="costos-adicionales"
-                            min="0" value="0" placeholder="0">
+                <template x-if="sesionesActivas.length === 0">
+                    <p>No hay sesiones activas en este momento.</p>
+                </template>
+
+                <template x-for="sesion in sesionesActivas" :key="sesion.id">
+                    <div id="detalle-resumen" style="margin-bottom: 20px;">
+                        <p><strong>Cliente:</strong> <span x-text="sesion.cliente"></span></p>
+                        <p><strong>Computador:</strong> <span x-text="sesion.computador"></span></p>
+                        <p><strong>Hora de inicio:</strong> <span x-text="sesion.horaInicioTexto"></span></p>
+                        <p><strong>Estado:</strong> En curso</p>
+                        
+                        <div>
+                            <label>Costos extras ($):</label>
+                            <input type="number" x-model.number="sesion.costosAdicionales" min="0" placeholder="0">
+                        </div>
+
+                        <button type="button" @click="finalizarSesion(sesion)">
+                            Finalizar y cobrar
+                        </button>
                     </div>
-
-                    <button type="button" id="btn-finalizar">
-                        Finalizar y cobrar
-                    </button>
-                </form>
-            </section>
-
-            <section>
-                <h3>Resumen de cobro</h3>
-
-                <div id="detalle-resumen">
-                    <p><strong>Cliente:</strong> <span id="resumen-cliente">-</span></p>
-                    <p><strong>Computador:</strong> <span id="resumen-computador">-</span></p>
-                    <p><strong>Hora de inicio:</strong> <span id="resumen-inicio">-</span></p>
-                    <p><strong>Hora de término:</strong> <span id="resumen-termino">-</span></p>
-                    <p><strong>Tiempo total:</strong> <span id="resumen-duracion">-</span></p>
-                    <p><strong>Costo por tiempo:</strong> <span id="resumen-costo-tiempo">0</span></p>
-                    <p><strong>Costos extras:</strong> <span id="resumen-costo-extra">0</span></p>
-                    <p><strong>Total a pagar:</strong> <span id="resumen-monto-final">0</span></p>
-                </div>
+                </template>
             </section>
         </main>
 
