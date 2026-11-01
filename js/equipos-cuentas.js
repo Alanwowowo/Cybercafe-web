@@ -75,7 +75,7 @@ function obtenerComputadoresIniciales() {
         {
             id: 2,
             nombre: "PC 02",
-            estado: "ocupado",
+            estado: "disponible",
             ubicacion: "Sala principal"
         },
         {
@@ -93,7 +93,7 @@ function obtenerComputadoresIniciales() {
         {
             id: 5,
             nombre: "PC 05",
-            estado: "ocupado",
+            estado: "disponible",
             ubicacion: "Sala secundaria"
         },
         {
@@ -483,6 +483,19 @@ function gestionCuentas() {
             const cuenta = this.cuentas.find((cuenta) => cuenta.id === id);
 
             if (!cuenta) {
+                return;
+            }
+
+            const cuentaIdActiva = sessionStorage.getItem("cuentaId");
+
+            if (
+                cuentaIdActiva !== null &&
+                String(cuenta.id) === String(cuentaIdActiva)
+            ) {
+                alert(
+                    "No puedes eliminar tu propia cuenta " +
+                    "mientras tienes una sesión activa."
+                );
                 return;
             }
 

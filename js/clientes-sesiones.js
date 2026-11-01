@@ -55,7 +55,7 @@ document.addEventListener('alpine:init', () => {
           {
             id: 2,
             nombre: 'PC 02',
-            estado: 'ocupado',
+            estado: 'disponible',
             ubicacion: 'Sala principal'
           },
           {
@@ -73,7 +73,7 @@ document.addEventListener('alpine:init', () => {
           {
             id: 5,
             nombre: 'PC 05',
-            estado: 'ocupado',
+            estado: 'disponible',
             ubicacion: 'Sala secundaria'
           },
           {
@@ -252,24 +252,74 @@ document.addEventListener('alpine:init', () => {
       this.limpiarFormCliente();
     },
 
+    clienteTieneSesionActiva(cliente) {
+        return this.sesionesActivas.some(sesion => {
+            const coincideId =
+                sesion.clienteId !== undefined &&
+                String(sesion.clienteId) === String(cliente.id);
+
+            const coincideNombreAnterior =
+                sesion.clienteId === undefined &&
+                sesion.cliente === cliente.nombre;
+
+            return coincideId || coincideNombreAnterior;
+        });
+    },
+
     editarCliente(cliente) {
-      this.mensajeError = '';
-      this.mensajeExito = '';
-      this.posicionEdicion = this.clientes.findIndex(c => c.id === cliente.id);
-      if (this.posicionEdicion !== -1) {
-        this.clienteForm = { ...this.clientes[this.posicionEdicion] };
-      }
+        this.mensajeError = '';
+        this.mensajeExito = '';
+
+        if (this.clienteTieneSesionActiva(cliente)) {
+            alert(
+                'No puedes editar este cliente ' +
+                'mientras tenga una sesión activa.'
+            );
+            return;
+        }
+
+        this.posicionEdicion = this.clientes.findIndex(
+            clienteGuardado =>
+                String(clienteGuardado.id) === String(cliente.id)
+        );
+
+        if (this.posicionEdicion !== -1) {
+            this.clienteForm = {
+                ...this.clientes[this.posicionEdicion]
+            };
+        }
     },
 
     eliminarCliente(id) {
-      if (confirm('¿Deseas eliminar este cliente?')) {
-        this.clientes = this.clientes.filter(c => String(c.id) !== String(id));
-        this.guardarClientes();
-        if (this.clienteForm.id === id) {
-          this.limpiarFormCliente();
+        const cliente = this.clientes.find(
+            cliente => String(cliente.id) === String(id)
+        );
+
+        if (!cliente) {
+            return;
         }
-        this.mensajeExito = 'Cliente eliminado correctamente.';
-      }
+
+        if (this.clienteTieneSesionActiva(cliente)) {
+            alert(
+                'No puedes eliminar este cliente ' +
+                'mientras tenga una sesión activa.'
+            );
+            return;
+        }
+
+        if (confirm('¿Deseas eliminar este cliente?')) {
+            this.clientes = this.clientes.filter(
+                cliente => String(cliente.id) !== String(id)
+            );
+
+            this.guardarClientes();
+
+            if (String(this.clienteForm.id) === String(id)) {
+                this.limpiarFormCliente();
+            }
+
+            this.mensajeExito = 'Cliente eliminado correctamente.';
+        }
     },
 
     limpiarFormCliente() {
@@ -304,6 +354,17 @@ document.addEventListener('alpine:init', () => {
       if (!this.selectCliente || !this.selectComputador) {
         alert('Selecciona un cliente y un computador.');
         return;
+      }
+
+      const clienteSeleccionado = this.clientes.find(
+          cliente =>
+              String(cliente.id) === String(this.selectCliente)
+      );
+
+      if (!clienteSeleccionado) {
+          alert('El cliente seleccionado ya no existe.');
+          this.selectCliente = '';
+          return;
       }
 
       const equiposGuardados = JSON.parse(
@@ -345,7 +406,8 @@ document.addEventListener('alpine:init', () => {
 
       const nuevaSesion = {
         id: Date.now(),
-        cliente: this.selectCliente,
+        clienteId: clienteSeleccionado.id,
+        cliente: clienteSeleccionado.nombre,
         computadorId: equipoSeleccionado.id,
         computador: equipoSeleccionado.nombre,
         horaInicio: ahora.getTime(),
