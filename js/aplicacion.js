@@ -73,6 +73,7 @@
 
     if (enlaceCerrarSesion) {
         enlaceCerrarSesion.addEventListener("click", function () {
+            sessionStorage.removeItem("rol");
             sessionStorage.removeItem("cuentaId");
         });
     }
