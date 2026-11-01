@@ -42,7 +42,7 @@ document.addEventListener('alpine:init', () => {
 
     cargarComputadoresAlan() {
       const equipos = JSON.parse(localStorage.getItem('cybernet_computadores'));
-      if (equipos && Array.isArray(equipos) && equipos.length > 0) {
+      if (Array.isArray(equipos)) { {
         this.computadores = equipos.filter(e => e.estado === 'disponible');
       } else {
         const equiposIniciales = [
