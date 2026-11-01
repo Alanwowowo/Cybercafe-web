@@ -298,7 +298,7 @@ document.addEventListener('alpine:init', () => {
 
       resultado.sort((a, b) => {
         if (this.ordenHistorial === 'fecha-desc') return b.fecha.localeCompare(a.fecha);
-        if (this.ordenHistorial === 'fecha-asc') return a.fecha.localeCompare(a.fecha);
+        if (this.ordenHistorial === 'fecha-asc') return a.fecha.localeCompare(b.fecha);
         if (this.ordenHistorial === 'monto-desc') return b.monto - a.monto;
         if (this.ordenHistorial === 'monto-asc') return a.monto - b.monto;
         return 0;
