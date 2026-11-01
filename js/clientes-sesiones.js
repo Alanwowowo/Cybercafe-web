@@ -3,7 +3,7 @@ document.addEventListener('alpine:init', () => {
     clientes: [],
     computadores: [],
     historial: [],
-    sesionActiva: null,
+    sesionesActivas: [],
     precioHora: 1500,
 
     clienteForm: { id: '', nombre: '', correo: '' },
@@ -27,7 +27,7 @@ document.addEventListener('alpine:init', () => {
       this.cargarConfiguracionChris();
       this.cargarComputadoresAlan();
       this.cargarClientes();
-      this.cargarSesionActiva();
+      this.cargarSesionesActivas();
       this.cargarHistorial();
     },
 
@@ -72,11 +72,17 @@ document.addEventListener('alpine:init', () => {
       localStorage.setItem('cybernet_clientes', JSON.stringify(this.clientes));
     },
 
-    cargarSesionActiva() {
-      const sesion = localStorage.getItem('cybernet_sesion_activa');
-      if (sesion) {
-        this.sesionActiva = JSON.parse(sesion);
+    cargarSesionesActivas() {
+      const guardadas = localStorage.getItem('cybernet_sesiones_activas');
+      if (guardadas) {
+        this.sesionesActivas = JSON.parse(guardadas);
+      } else {
+        this.sesionesActivas = [];
       }
+    },
+
+    guardarSesionesActivas() {
+      localStorage.setItem('cybernet_sesiones_activas', JSON.stringify(this.sesionesActivas));
     },
 
     cargarHistorial() {
@@ -106,6 +112,13 @@ document.addEventListener('alpine:init', () => {
 
       if (!id || !nombre || !correo) {
         this.mensajeError = 'Todos los campos son obligatorios.';
+        return;
+      }
+
+      // Validacion de formato de RUT
+      const rutRegex = /^(\d{1,2}\.\d{3}\.\d{3}-[\dkK]|\d{7,8}-[\dkK])$/;
+      if (!rutRegex.test(id)) {
+        this.mensajeError = 'Ingrese un RUT con formato válido (Ej: 12345678-9 o 12.345.678-K).';
         return;
       }
 
@@ -153,7 +166,7 @@ document.addEventListener('alpine:init', () => {
 
     eliminarCliente(id) {
       if (confirm('¿Deseas eliminar este cliente?')) {
-        this.clientes = this.clientes.filter(c => c.id !== id);
+        this.clientes = this.clientes.filter(c => String(c.id) !== String(id));
         this.guardarClientes();
         if (this.clienteForm.id === id) {
           this.limpiarFormCliente();
@@ -191,13 +204,14 @@ document.addEventListener('alpine:init', () => {
     },
 
     iniciarSesion() {
-      if (this.sesionActiva) {
-        alert('Ya existe una sesión activa. Debes finalizarla primero.');
+      if (!this.selectCliente || !this.selectComputador) {
+        alert('Selecciona un cliente y un computador.');
         return;
       }
 
-      if (!this.selectCliente || !this.selectComputador) {
-        alert('Selecciona un cliente y un computador.');
+      const equipoOcupado = this.sesionesActivas.some(s => s.computador === this.selectComputador);
+      if (equipoOcupado) {
+        alert('Este computador ya tiene una sesión activa.');
         return;
       }
 
@@ -206,7 +220,8 @@ document.addEventListener('alpine:init', () => {
       const mes = String(ahora.getMonth() + 1).padStart(2, '0');
       const dia = String(ahora.getDate()).padStart(2, '0');
 
-      this.sesionActiva = {
+      const nuevaSesion = {
+        id: Date.now(),
         cliente: this.selectCliente,
         computador: this.selectComputador,
         horaInicio: ahora.getTime(),
@@ -214,22 +229,31 @@ document.addEventListener('alpine:init', () => {
         fecha: `${anio}-${mes}-${dia}`
       };
 
-      localStorage.setItem('cybernet_sesion_activa', JSON.stringify(this.sesionActiva));
-      alert(`Sesión iniciada para ${this.sesionActiva.cliente} en ${this.sesionActiva.computador}`);
+      this.sesionesActivas.push(nuevaSesion);
+      this.guardarSesionesActivas();
+
+      alert(`Sesión iniciada para ${nuevaSesion.cliente} en ${nuevaSesion.computador}`);
+      this.selectCliente = '';
+      this.selectComputador = '';
     },
 
-    finalizarSesion() {
-      if (!this.sesionActiva) {
-        alert('Primero debes iniciar una sesión.');
+    finalizarSesion(sesionAProcesar) {
+      let sesion = sesionAProcesar;
+      if (!sesion && this.sesionesActivas.length > 0) {
+        sesion = this.sesionesActivas[0];
+      }
+
+      if (!sesion) {
+        alert('No hay ninguna sesión activa para finalizar.');
         return;
       }
 
-      if (!confirm(`¿Deseas finalizar la sesión de ${this.sesionActiva.cliente}?`)) {
+      if (!confirm(`¿Deseas finalizar la sesión de ${sesion.cliente}?`)) {
         return;
       }
 
       const horaTermino = new Date().getTime();
-      let duracion = Math.ceil((horaTermino - this.sesionActiva.horaInicio) / 60000);
+      let duracion = Math.ceil((horaTermino - sesion.horaInicio) / 60000);
       if (duracion < 1) duracion = 1;
 
       const tarifaPorMinuto = this.precioHora / 60;
@@ -237,23 +261,21 @@ document.addEventListener('alpine:init', () => {
       const extras = Number(this.costosAdicionales) || 0;
       const montoFinal = costoTiempo + extras;
 
-      const nuevaSesion = {
-        cliente: this.sesionActiva.cliente,
-        computador: this.sesionActiva.computador,
-        fecha: this.sesionActiva.fecha,
+      const registroHistorial = {
+        cliente: sesion.cliente,
+        computador: sesion.computador,
+        fecha: sesion.fecha,
         duracion: duracion + ' min',
         monto: montoFinal
       };
 
-      this.historial.push(nuevaSesion);
+      this.historial.push(registroHistorial);
       this.guardarHistorial();
 
-      localStorage.removeItem('cybernet_sesion_activa');
-      this.sesionActiva = null;
-      this.costosAdicionales = 0;
-      this.selectCliente = '';
-      this.selectComputador = '';
+      this.sesionesActivas = this.sesionesActivas.filter(s => s.id !== sesion.id);
+      this.guardarSesionesActivas();
 
+      this.costosAdicionales = 0;
       alert('Sesión finalizada y guardada en el historial.');
     },
 
