@@ -1,12 +1,52 @@
-(function () {
-    const rolUsuario = sessionStorage.getItem("rol");
+(async function () {
     const paginaActual = window.location.pathname;
+    document.body.style.visibility = "hidden";
 
-    // 1. Si no hay sesión iniciada, redirigir al login y detener la ejecución
-    if (!rolUsuario) {
-        window.location.replace("../index.html");
-        return;
+    function volverAlLogin() {
+        sessionStorage.removeItem("rol");
+        sessionStorage.removeItem("cuentaId");
+        window.location.replace("/");
     }
+
+    window.addEventListener("pageshow", function (evento) {
+        if (evento.persisted) window.location.reload();
+    });
+
+    let usuario;
+
+    try {
+        const renovacion = await fetch("/api/auth/refresh", {
+            method: "POST",
+            credentials: "same-origin",
+        });
+
+        if (renovacion.status === 401) return volverAlLogin();
+        if (!renovacion.ok) throw new Error("No se pudo renovar la sesión");
+
+        const { accessToken } = await renovacion.json();
+        if (typeof accessToken !== "string") throw new Error("JWT no recibido");
+
+        const perfil = await fetch("/api/auth/me", {
+            headers: { Authorization: "Bearer " + accessToken },
+        });
+
+        if (perfil.status === 401) return volverAlLogin();
+        if (!perfil.ok) throw new Error("No se pudo consultar el perfil");
+
+        ({ usuario } = await perfil.json());
+    } catch {
+        alert("No se pudo comprobar la sesión. Intenta iniciar sesión de nuevo.");
+        return volverAlLogin();
+    }
+
+    if (!usuario?.id || !["administrador", "encargado"].includes(usuario.rol)) {
+        return volverAlLogin();
+    }
+
+    const rolUsuario = usuario.rol;
+    sessionStorage.setItem("rol", rolUsuario);
+    sessionStorage.setItem("cuentaId", usuario.id);
+    document.body.style.visibility = "";
 
     // 2. Ocultar enlaces del menú según el rol
     const enlaceAdministrador = document.querySelector(
@@ -72,9 +112,26 @@
     );
 
     if (enlaceCerrarSesion) {
-        enlaceCerrarSesion.addEventListener("click", function () {
-            sessionStorage.removeItem("rol");
-            sessionStorage.removeItem("cuentaId");
+        let cerrando = false;
+
+        enlaceCerrarSesion.addEventListener("click", async function (evento) {
+            evento.preventDefault();
+            if (cerrando) return;
+            cerrando = true;
+
+            try {
+                const respuesta = await fetch("/api/auth/logout", {
+                    method: "POST",
+                    credentials: "same-origin",
+                });
+
+                if (respuesta.status !== 204) throw new Error("Logout falló");
+                volverAlLogin();
+            } catch {
+                alert("No se pudo cerrar la sesión. Intenta de nuevo.");
+            } finally {
+                cerrando = false;
+            }
         });
-    }
+    };
 })();

@@ -150,29 +150,55 @@ const formularioLogin = document.getElementById("form-login");
 if (formularioLogin) {
     const correo = document.getElementById("correo");
     const contrasena = document.getElementById("password");
+    let enviando = false;
 
-    formularioLogin.addEventListener("submit", function (evento) {
+    formularioLogin.addEventListener("submit", async function (evento) {
         evento.preventDefault();
+        if (enviando) return;
+        enviando = true;
 
-        const correoIngresado = correo.value.trim().toLowerCase();
-        const contrasenaIngresada = contrasena.value.trim();
+        try {
+            const respuesta = await fetch("/api/auth/login", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    correo: correo.value.trim(),
+                    contrasena: contrasena.value,
+                }),
+            });
 
-        if (
-            correoIngresado === "admin@cybernet.com" &&
-            contrasenaIngresada === "admin123"
-        ) {
-            sessionStorage.setItem("rol", "administrador");
-            sessionStorage.setItem("cuentaId", "1");
-            window.location.href = "paginas/inicio-admin.html";
-        } else if (
-            correoIngresado === "elianny.ortega@cybernet.com" &&
-            contrasenaIngresada === "encargado123"
-        ) {
-            sessionStorage.setItem("rol", "encargado");
-            sessionStorage.setItem("cuentaId", "2");
-            window.location.href = "paginas/inicio-encargado.html";
-        } else {
-            alert("Correo o contraseña incorrectos.");
+            if (respuesta.status === 401) {
+                alert("Correo o contraseña incorrectos.");
+                return;
+            }
+
+            if (!respuesta.ok) {
+                alert("No se pudo iniciar sesión. Intenta de nuevo.");
+                return;
+            }
+
+            const { usuario } = await respuesta.json();
+
+            let destino;
+            if (usuario?.rol === "administrador") {
+                destino = "/paginas/inicio-admin.html";
+            } else if (usuario?.rol === "encargado") {
+                destino = "/paginas/inicio-encargado.html";
+            }
+
+            if (!destino || !usuario?.id) {
+                alert("No hay un panel disponible para esta cuenta.");
+                return;
+            }
+
+            sessionStorage.setItem("rol", usuario.rol);
+            sessionStorage.setItem("cuentaId", usuario.id);
+            window.location.replace(destino);
+        } catch {
+            alert("No se pudo conectar con el servidor.");
+        } finally {
+            enviando = false;
         }
     });
 }
