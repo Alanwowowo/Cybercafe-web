@@ -8,3 +8,9 @@ const cliente = new MongoClient(uri, {
 export async function verificarMongo() {
     await cliente.db("admin").command({ ping: 1 });
 }
+
+export const baseDatos = cliente.db(process.env.MONGO_DB ?? "cybernet_e3");
+
+export function cerrarMongo() {
+    return cliente.close();
+}
