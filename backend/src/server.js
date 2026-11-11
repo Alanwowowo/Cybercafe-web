@@ -1,8 +1,17 @@
 import express from "express";
 import { verificarMongo } from "./db.js";
 import { prepararCuentas } from "./repositories/cuentas.repository.js";
+import { login, refresh } from "./controllers/auth.controller.js";
+import { requerirAuth } from "./middleware/requerir-auth.js";
+import { prepararSesionesAcceso } from "./repositories/sesiones-acceso.repository.js";
 
 const app = express();
+
+app.post("/api/auth/login", express.json({ limit: "4kb" }), login);
+
+app.get("/api/auth/me", requerirAuth, (req, res) => {
+    res.json({ usuario: req.usuario });
+});
 
 app.get("/api/health", async (req, res) => {
     try {
@@ -15,6 +24,10 @@ app.get("/api/health", async (req, res) => {
 
 const indice = await prepararCuentas();
 console.log("Índice de cuentas listo:", indice);
+
+await prepararSesionesAcceso();
+
+app.post("/api/auth/refresh", refresh);
 
 app.listen(3000, "127.0.0.1", () => {
     console.log("API de CyberNet en http://127.0.0.1:3000");
