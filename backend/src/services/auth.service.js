@@ -10,6 +10,7 @@ import {
     guardarSesionAcceso,
     buscarSesionVigente,
     rotarRefreshHash,
+    eliminarSesionPorHash,
 } from "../repositories/sesiones-acceso.repository.js";
 
 export async function iniciarSesion(correo, contrasena) {
@@ -69,4 +70,8 @@ export async function renovarSesion(tokenActual) {
     if (!rotado) return null;
 
     return { accessToken, refreshToken, venceEn: sesion.venceEn };
+}
+
+export async function cerrarSesion(tokenActual) {
+    await eliminarSesionPorHash(hashRefresh(tokenActual));
 }

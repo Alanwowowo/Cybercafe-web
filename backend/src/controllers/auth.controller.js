@@ -1,4 +1,4 @@
-import { iniciarSesion, renovarSesion } from "../services/auth.service.js";
+import { iniciarSesion, renovarSesion, cerrarSesion } from "../services/auth.service.js";
 import { DURACION_REFRESH_MS } from "../tokens.js";
 
 export async function login(req, res) {
@@ -50,4 +50,28 @@ export async function refresh(req, res) {
     });
 
     return res.json({ accessToken: resultado.accessToken });
+}
+
+export async function logout(req, res) {
+    res.set("Cache-Control", "no-store");
+
+    const origenPermitido = process.env.APP_ORIGIN ?? "http://127.0.0.1:3000";
+    if (req.get("Origin") !== origenPermitido) {
+        return res.status(403).json({ mensaje: "Origen no permitido" });
+    }
+
+    const cookie = req.get("Cookie") ?? "";
+    const token = /(?:^|;\s*)cybernet_refresh=([A-Za-z0-9_-]{43})(?=;|$)/
+        .exec(cookie)?.[1];
+
+    if (token) await cerrarSesion(token);
+
+    res.clearCookie("cybernet_refresh", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        path: "/api/auth",
+    });
+
+    return res.status(204).end();
 }

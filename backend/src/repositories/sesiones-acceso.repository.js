@@ -26,3 +26,7 @@ export async function rotarRefreshHash(id, hashActual, hashNuevo) {
 
     return resultado.modifiedCount === 1;
 }
+
+export function eliminarSesionPorHash(refreshHash) {
+    return sesiones.deleteOne({ refreshHash });
+}
