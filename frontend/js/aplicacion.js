@@ -213,6 +213,28 @@ window.sesionCyberNetLista = (async function () {
             return respuesta.json();
         },
 
+        async editarCuenta(id, { nombre, correo }) {
+            const respuesta = await fetch("/api/cuentas/" + encodeURIComponent(id), {
+                method: "PATCH",
+                headers: {
+                    Authorization: "Bearer " + accessToken,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ nombre, correo }),
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu acceso venció. Recarga la página e intenta de nuevo.");
+            }
+
+            if (!respuesta.ok) {
+                const error = await respuesta.json().catch(() => null);
+                throw new Error(error?.mensaje || "No se pudo editar la cuenta.");
+            }
+
+            return respuesta.json();
+        },
+
         async crearCuenta(datos) {
             const respuesta = await fetch("/api/cuentas", {
                 method: "POST",

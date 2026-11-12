@@ -38,3 +38,14 @@ export async function insertarCuenta(cuenta) {
     const resultado = await baseDatos.collection("cuentas").insertOne(cuenta);
     return resultado.insertedId.toString();
 }
+
+export function actualizarDatosCuenta(id, cambios) {
+    return baseDatos.collection("cuentas").findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: cambios },
+        {
+            returnDocument: "after",
+            projection: { _id: 1, nombre: 1, correo: 1, rol: 1, estado: 1 },
+        }
+    );
+}

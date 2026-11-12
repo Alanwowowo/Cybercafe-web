@@ -103,7 +103,7 @@ function gestionComputadores() {
     return {
         computadores: [],
         mensajeComputadores: "Cargando equipos...",
-        formularioVisible: false, 
+        formularioVisible: false,
         guardandoComputador: false,
         idEdicion: null,
 
@@ -415,26 +415,32 @@ function gestionCuentas() {
         },
 
         async guardarCuenta() {
-            if (this.guardandoCuenta || this.idEdicion !== null) return;
+            if (this.guardandoCuenta) return;
 
+            const { idEdicion, nombre, correo, rol, estado, contrasena } = this;
             this.guardandoCuenta = true;
 
             try {
                 const sesion = await window.sesionCyberNetLista;
                 if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
 
-                const cuenta = await sesion.crearCuenta({
-                    nombre: this.nombre,
-                    correo: this.correo,
-                    rol: this.rol,
-                    estado: this.estado,
-                    contrasena: this.contrasena
-                });
+                const cuenta = idEdicion === null
+                    ? await sesion.crearCuenta({ nombre, correo, rol, estado, contrasena })
+                    : await sesion.editarCuenta(idEdicion, { nombre, correo });
 
-                this.cuentas.push({
+                const cuentaVisible = {
                     ...cuenta,
                     rol: cuenta.rol === "administrador" ? "Administrador" : "Encargado"
-                });
+                };
+
+                if (idEdicion === null) {
+                    this.cuentas.push(cuentaVisible);
+                } else {
+                    this.cuentas = this.cuentas.map(actual =>
+                        actual.id === idEdicion ? cuentaVisible : actual
+                    );
+                }
+
                 this.cancelarFormulario();
             } catch (error) {
                 alert(error.message || "No se pudo guardar la cuenta.");
