@@ -109,7 +109,8 @@ function gestionComputadores() {
     return {
         computadores: [],
         mensajeComputadores: "Cargando equipos...",
-        formularioVisible: false,
+        formularioVisible: false, 
+        guardandoComputador: false,
         idEdicion: null,
 
         nombre: "",
@@ -125,7 +126,7 @@ function gestionComputadores() {
                 if (!sesion) return;
 
                 this.computadores = await sesion.listarEquipos();
-                this.mensajeComputadores = "Listado de MongoDB · Solo lectura";
+                this.mensajeComputadores = "Listado de MongoDB";
             } catch {
                 this.mensajeComputadores = "No se pudo cargar el listado de equipos.";
             }
@@ -154,49 +155,33 @@ function gestionComputadores() {
             this.ubicacion = "Sala principal";
         },
 
-        guardarComputador() {
-            const nombreLimpio = this.nombre.trim();
+        async guardarComputador() {
+            if (this.guardandoComputador || this.idEdicion !== null) return;
 
-            if (nombreLimpio === "") {
-                alert("Debes ingresar el nombre del computador.");
+            const nombre = this.nombre.trim();
+            const ubicacion = this.ubicacion.trim();
+
+            if (!nombre || !ubicacion) {
+                alert("Completa el nombre y la ubicación.");
                 return;
             }
 
-            const nombreRepetido = this.computadores.some(
-                (computador) =>
-                    computador.nombre.toLowerCase() ===
-                        nombreLimpio.toLowerCase() &&
-                    computador.id !== this.idEdicion
-            );
+            this.guardandoComputador = true;
 
-            if (nombreRepetido) {
-                alert("Ya existe un computador con ese nombre.");
-                return;
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
+
+                const equipo = await sesion.crearEquipo({ nombre, ubicacion });
+
+                this.computadores.push(equipo);
+                this.formularioVisible = false;
+                this.mensajeComputadores = "Equipo agregado: " + equipo.nombre;
+            } catch (error) {
+                alert(error.message || "No se pudo guardar el equipo.");
+            } finally {
+                this.guardandoComputador = false;
             }
-
-            if (this.idEdicion === null) {
-                this.computadores.push({
-                    id: Date.now(),
-                    nombre: nombreLimpio,
-                    estado: this.estado,
-                    ubicacion: this.ubicacion
-                });
-            } else {
-                const indice = this.computadores.findIndex(
-                    (computador) =>
-                        computador.id === this.idEdicion
-                );
-
-                this.computadores.splice(indice, 1, {
-                    id: this.idEdicion,
-                    nombre: nombreLimpio,
-                    estado: this.estado,
-                    ubicacion: this.ubicacion
-                });
-            }
-
-            this.guardarEnStorage();
-            this.cancelarFormulario();
         },
 
         tieneSesionActiva(computador) {

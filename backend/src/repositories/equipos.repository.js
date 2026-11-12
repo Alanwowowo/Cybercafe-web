@@ -15,3 +15,15 @@ export function insertarEquipoSiNoExiste(equipo) {
         { upsert: true },
     );
 }
+
+export function prepararEquipos() {
+    return equipos.createIndex(
+        { nombre: 1 },
+        { unique: true, name: "nombre_equipo_unico" },
+    );
+}
+
+export async function insertarEquipo(equipo) {
+    const resultado = await equipos.insertOne(equipo);
+    return resultado.insertedId.toString();
+}

@@ -149,5 +149,32 @@ window.sesionCyberNetLista = (async function () {
 
             return respuesta.json();
         },
-    };
+
+        async crearEquipo({ nombre, ubicacion }) {
+            const respuesta = await fetch("/api/equipos", {
+                method: "POST",
+                headers: {
+                    Authorization: "Bearer " + accessToken,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ nombre, ubicacion }),
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu acceso venció. Recarga la página e intenta de nuevo.");
+            }
+
+            if (respuesta.status === 409) {
+                throw new Error("Ya existe un equipo con ese nombre.");
+            }
+
+            if (respuesta.status === 400) {
+                throw new Error("Revisa el nombre y la ubicación del equipo.");
+            }
+
+            if (!respuesta.ok) throw new Error("No se pudo crear el equipo.");
+
+            return respuesta.json();
+        },        
+    };    
 })();

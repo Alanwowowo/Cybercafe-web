@@ -5,11 +5,13 @@ import { login, refresh, logout } from "./controllers/auth.controller.js";
 import { requerirAuth } from "./middleware/requerir-auth.js";
 import { prepararSesionesAcceso } from "./repositories/sesiones-acceso.repository.js";
 import { fileURLToPath } from "node:url";
-import { obtenerEquipos } from "./controllers/equipos.controller.js";
+import { obtenerEquipos, crearEquipo  } from "./controllers/equipos.controller.js";
+import { prepararEquipos } from "./repositories/equipos.repository.js";
 
 const app = express();
 
 app.get("/api/equipos", requerirAuth, obtenerEquipos);
+app.post("/api/equipos", requerirAuth, express.json({ limit: "4kb" }), crearEquipo);
 
 app.post("/api/auth/login", express.json({ limit: "4kb" }), login);
 
@@ -30,6 +32,7 @@ const indice = await prepararCuentas();
 console.log("Índice de cuentas listo:", indice);
 
 await prepararSesionesAcceso();
+await prepararEquipos();
 
 app.post("/api/auth/refresh", refresh);
 app.post("/api/auth/logout", logout);
