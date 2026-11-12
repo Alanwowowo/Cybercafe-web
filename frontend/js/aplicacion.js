@@ -137,8 +137,9 @@ window.sesionCyberNetLista = (async function () {
     };
 
     return {
-        async listarEquipos() {
-            const respuesta = await fetch("/api/equipos", {
+        async listarEquipos({ paraMapa = false } = {}) {
+            const ruta = paraMapa ? "/api/mapa-equipos" : "/api/equipos";
+            const respuesta = await fetch(ruta, {
                 headers: { Authorization: "Bearer " + accessToken },
                 cache: "no-store",
             });

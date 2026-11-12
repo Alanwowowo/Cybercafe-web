@@ -4,20 +4,14 @@ function gestionMapaEquipos() {
         computadores: [],
         filtroEstado: "todos",
 
-        iniciar() {
-            const guardados = localStorage.getItem(
-                "cybernet_computadores"
-            );
+        async iniciar() {
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) return;
 
-            if (guardados) {
-                this.computadores = JSON.parse(guardados);
-            } else {
-                this.computadores = obtenerComputadoresIniciales();
-
-                localStorage.setItem(
-                    "cybernet_computadores",
-                    JSON.stringify(this.computadores)
-                );
+                this.computadores = await sesion.listarEquipos({ paraMapa: true });
+            } catch {
+                alert("No se pudo cargar el mapa de equipos.");
             }
         },
 

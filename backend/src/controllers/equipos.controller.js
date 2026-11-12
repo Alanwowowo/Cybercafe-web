@@ -8,6 +8,16 @@ export async function obtenerEquipos(req, res) {
     return res.json(await listarEquipos());
 }
 
+export async function obtenerEquiposParaMapa(req, res) {
+    const { rol } = req.usuario;
+
+    if (rol !== "administrador" && rol !== "encargado") {
+        return res.status(403).json({ mensaje: "No tienes permiso para ver el mapa." });
+    }
+
+    return res.json(await listarEquipos());
+}
+
 export async function crearEquipo(req, res) {
     if (req.usuario.rol !== "administrador") {
         return res.status(403).json({ mensaje: "No tienes permiso para crear equipos" });
