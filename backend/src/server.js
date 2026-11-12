@@ -5,8 +5,11 @@ import { login, refresh, logout } from "./controllers/auth.controller.js";
 import { requerirAuth } from "./middleware/requerir-auth.js";
 import { prepararSesionesAcceso } from "./repositories/sesiones-acceso.repository.js";
 import { fileURLToPath } from "node:url";
+import { obtenerEquipos } from "./controllers/equipos.controller.js";
 
 const app = express();
+
+app.get("/api/equipos", requerirAuth, obtenerEquipos);
 
 app.post("/api/auth/login", express.json({ limit: "4kb" }), login);
 

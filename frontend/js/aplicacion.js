@@ -1,4 +1,4 @@
-(async function () {
+window.sesionCyberNetLista = (async function () {
     const paginaActual = window.location.pathname;
     document.body.style.visibility = "hidden";
 
@@ -13,6 +13,7 @@
     });
 
     let usuario;
+    let accessToken;
 
     try {
         const renovacion = await fetch("/api/auth/refresh", {
@@ -23,7 +24,7 @@
         if (renovacion.status === 401) return volverAlLogin();
         if (!renovacion.ok) throw new Error("No se pudo renovar la sesión");
 
-        const { accessToken } = await renovacion.json();
+        ({ accessToken } = await renovacion.json());
         if (typeof accessToken !== "string") throw new Error("JWT no recibido");
 
         const perfil = await fetch("/api/auth/me", {
@@ -133,5 +134,20 @@
                 cerrando = false;
             }
         });
+    };
+
+    return {
+        async listarEquipos() {
+            const respuesta = await fetch("/api/equipos", {
+                headers: { Authorization: "Bearer " + accessToken },
+                cache: "no-store",
+            });
+
+            if (!respuesta.ok) {
+                throw new Error("Error al listar equipos: " + respuesta.status);
+            }
+
+            return respuesta.json();
+        },
     };
 })();

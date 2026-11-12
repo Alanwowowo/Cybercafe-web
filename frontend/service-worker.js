@@ -64,12 +64,11 @@ self.addEventListener("activate", function (evento) {
 });
 
 self.addEventListener("fetch", function (evento) {
-    if (evento.request.method !== "GET") {
-        return;
-    }
+    if (new URL(evento.request.url).pathname.startsWith("/api/")) return;
 
     evento.respondWith(
         fetch(evento.request)
+
             .then(function (respuesta) {
                 if (respuesta.status !== 200 || respuesta.type !== "basic") {
                     return respuesta;
@@ -95,6 +94,6 @@ self.addEventListener("fetch", function (evento) {
                             return caches.match("/paginas/offline.html");
                         }
                     });
-            })
+          })
     );
 });

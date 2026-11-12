@@ -108,6 +108,7 @@ function obtenerComputadoresIniciales() {
 function gestionComputadores() {
     return {
         computadores: [],
+        mensajeComputadores: "Cargando equipos...",
         formularioVisible: false,
         idEdicion: null,
 
@@ -118,16 +119,15 @@ function gestionComputadores() {
         filtroEstado: "todos",
         orden: "nombre-asc",
 
-        iniciar() {
-            const guardados = localStorage.getItem(
-                "cybernet_computadores"
-            );
+        async iniciar() {
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) return;
 
-            if (guardados) {
-                this.computadores = JSON.parse(guardados);
-            } else {
-                this.computadores = obtenerComputadoresIniciales();
-                this.guardarEnStorage();
+                this.computadores = await sesion.listarEquipos();
+                this.mensajeComputadores = "Listado de MongoDB · Solo lectura";
+            } catch {
+                this.mensajeComputadores = "No se pudo cargar el listado de equipos.";
             }
         },
 
