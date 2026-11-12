@@ -1,4 +1,5 @@
 import { baseDatos } from "../db.js";
+import { ObjectId } from "mongodb";
 
 const equipos = baseDatos.collection("equipos");
 
@@ -26,4 +27,12 @@ export function prepararEquipos() {
 export async function insertarEquipo(equipo) {
     const resultado = await equipos.insertOne(equipo);
     return resultado.insertedId.toString();
+}
+
+export function actualizarEquipo(id, cambios) {
+    return equipos.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: cambios },
+        { returnDocument: "after" }
+    );
 }

@@ -175,6 +175,28 @@ window.sesionCyberNetLista = (async function () {
             if (!respuesta.ok) throw new Error("No se pudo crear el equipo.");
 
             return respuesta.json();
+        },
+
+        async editarEquipo(id, { nombre, ubicacion }) {
+            const respuesta = await fetch("/api/equipos/" + encodeURIComponent(id), {
+                method: "PATCH",
+                headers: {
+                    Authorization: "Bearer " + accessToken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ nombre, ubicacion })
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu acceso venció. Recarga la página e intenta de nuevo.");
+            }
+
+            if (!respuesta.ok) {
+                const error = await respuesta.json().catch(() => null);
+                throw new Error(error?.mensaje || "No se pudo editar el equipo.");
+            }
+
+            return respuesta.json();
         },        
     };    
 })();

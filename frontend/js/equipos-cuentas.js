@@ -156,27 +156,36 @@ function gestionComputadores() {
         },
 
         async guardarComputador() {
-            if (this.guardandoComputador || this.idEdicion !== null) return;
+            if (this.guardandoComputador) return;
 
+            const id = this.idEdicion;
             const nombre = this.nombre.trim();
             const ubicacion = this.ubicacion.trim();
 
             if (!nombre || !ubicacion) {
-                alert("Completa el nombre y la ubicación.");
+                alert("Ingresa el nombre y la ubicación del computador.");
                 return;
             }
 
             this.guardandoComputador = true;
-
             try {
                 const sesion = await window.sesionCyberNetLista;
                 if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
 
-                const equipo = await sesion.crearEquipo({ nombre, ubicacion });
+                if (id === null) {
+                    const equipo = await sesion.crearEquipo({ nombre, ubicacion });
+                    this.computadores.push(equipo);
+                    this.mensajeComputadores = "Equipo agregado: " + equipo.nombre;
+                } else {
+                    const equipo = await sesion.editarEquipo(id, { nombre, ubicacion });
+                    this.computadores = this.computadores.map(
+                        computador => computador.id === id ? equipo : computador
+                    );
+                    this.mensajeComputadores = "Equipo actualizado: " + equipo.nombre;
+                }
 
-                this.computadores.push(equipo);
                 this.formularioVisible = false;
-                this.mensajeComputadores = "Equipo agregado: " + equipo.nombre;
+                this.idEdicion = null;
             } catch (error) {
                 alert(error.message || "No se pudo guardar el equipo.");
             } finally {

@@ -1,4 +1,4 @@
-import { listarEquipos, registrarEquipo } from "../services/equipos.service.js";
+import { listarEquipos, registrarEquipo, editarEquipo } from "../services/equipos.service.js";
 
 export async function obtenerEquipos(req, res) {
     if (req.usuario.rol !== "administrador") {
@@ -29,5 +29,35 @@ export async function crearEquipo(req, res) {
         }
 
         throw error;
+    }
+}
+
+export async function modificarEquipo(req, res, next) {
+    if (req.usuario.rol !== "administrador") {
+        return res.status(403).json({ mensaje: "No tienes permiso para editar equipos." });
+    }
+
+    try {
+        const resultado = await editarEquipo(req.params.id, req.body);
+
+        if (resultado.error === "ID_INVALIDO") {
+            return res.status(400).json({ mensaje: "El ID del equipo no es válido." });
+        }
+
+        if (resultado.error === "DATOS_INVALIDOS") {
+            return res.status(400).json({ mensaje: "Revisa el nombre y la ubicación." });
+        }
+
+        if (resultado.error === "EQUIPO_NO_ENCONTRADO") {
+            return res.status(404).json({ mensaje: "No se encontró el equipo." });
+        }
+
+        return res.status(200).json(resultado);
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(409).json({ mensaje: "Ya existe un equipo con ese nombre." });
+        }
+
+        return next(error);
     }
 }
