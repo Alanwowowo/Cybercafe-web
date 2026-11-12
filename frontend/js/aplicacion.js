@@ -69,7 +69,7 @@ window.sesionCyberNetLista = (async function () {
     // Ocultar las funciones exclusivas del administrador
     if (rolUsuario === "encargado") {
         const enlacesGestionCuentas = document.querySelectorAll(
-            'a[href="gestion-cuentas.html"]'
+            'a[href="gestion-cuentas.html"], a[href="gestion-computadores.html"]'
         );
 
         enlacesGestionCuentas.forEach(function (enlace) {
@@ -208,6 +208,28 @@ window.sesionCyberNetLista = (async function () {
             if (!respuesta.ok) {
                 const error = await respuesta.json().catch(() => null);
                 throw new Error(error?.mensaje || "No se pudo editar el equipo.");
+            }
+
+            return respuesta.json();
+        },
+
+        async crearCuenta(datos) {
+            const respuesta = await fetch("/api/cuentas", {
+                method: "POST",
+                headers: {
+                    Authorization: "Bearer " + accessToken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(datos)
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu sesión venció. Recarga la página e intenta de nuevo.");
+            }
+
+            if (!respuesta.ok) {
+                const error = await respuesta.json().catch(() => null);
+                throw new Error(error?.mensaje || "No se pudo crear la cuenta.");
             }
 
             return respuesta.json();

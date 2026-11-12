@@ -364,6 +364,8 @@ function gestionCuentas() {
         filtroRol: "todos",
         filtroEstado: "todos",
         orden: "nombre-asc",
+        contrasena: "",
+        guardandoCuenta: false,
 
         async iniciar() {
             try {
@@ -399,6 +401,7 @@ function gestionCuentas() {
             this.rol = "Encargado";
             this.estado = "activa";
             this.formularioVisible = true;
+            this.contrasena = "";
         },
 
         cancelarFormulario() {
@@ -408,51 +411,36 @@ function gestionCuentas() {
             this.correo = "";
             this.rol = "Encargado";
             this.estado = "activa";
+            this.contrasena = "";
         },
 
-        guardarCuenta() {
-            const nombreLimpio = this.nombre.trim();
-            const correoLimpio = this.correo.trim().toLowerCase();
+        async guardarCuenta() {
+            if (this.guardandoCuenta || this.idEdicion !== null) return;
 
-            if (nombreLimpio === "" || correoLimpio === "") {
-                alert("Debes completar el nombre y el correo.");
-                return;
-            }
+            this.guardandoCuenta = true;
 
-            const correoRepetido = this.cuentas.some((cuenta) =>
-                cuenta.correo.toLowerCase() === correoLimpio &&
-                cuenta.id !== this.idEdicion
-            );
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
 
-            if (correoRepetido) {
-                alert("Ya existe una cuenta con ese correo.");
-                return;
-            }
+                const cuenta = await sesion.crearCuenta({
+                    nombre: this.nombre,
+                    correo: this.correo,
+                    rol: this.rol,
+                    estado: this.estado,
+                    contrasena: this.contrasena
+                });
 
-            if (this.idEdicion === null) {
                 this.cuentas.push({
-                    id: Date.now(),
-                    nombre: nombreLimpio,
-                    correo: correoLimpio,
-                    rol: this.rol,
-                    estado: this.estado
+                    ...cuenta,
+                    rol: cuenta.rol === "administrador" ? "Administrador" : "Encargado"
                 });
-            } else {
-                const indice = this.cuentas.findIndex(
-                    (cuenta) => cuenta.id === this.idEdicion
-                );
-
-                this.cuentas.splice(indice, 1, {
-                    id: this.idEdicion,
-                    nombre: nombreLimpio,
-                    correo: correoLimpio,
-                    rol: this.rol,
-                    estado: this.estado
-                });
+                this.cancelarFormulario();
+            } catch (error) {
+                alert(error.message || "No se pudo guardar la cuenta.");
+            } finally {
+                this.guardandoCuenta = false;
             }
-
-            this.guardarEnStorage();
-            this.cancelarFormulario();
         },
 
         editarCuenta(id) {

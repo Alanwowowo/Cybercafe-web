@@ -63,7 +63,7 @@
                     <p>Administra las cuentas con acceso al sistema</p>
                 </div>
 
-                <button type="button" id="boton-agregar-cuenta" @click="abrirFormulario()" disabled>
+                <button type="button" id="boton-agregar-cuenta" @click="abrirFormulario()">
                     Agregar cuenta
                 </button>
             </div>
@@ -81,6 +81,12 @@
                     <label for="correo-cuenta">Correo electrónico:</label>
                     <input type="email" id="correo-cuenta" x-model="correo"
                         placeholder="Ejemplo: juan.perez@cybernet.com" required>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="contrasena-cuenta">Contraseña:</label>
+                    <input type="password" id="contrasena-cuenta" x-model="contrasena"
+                        autocomplete="new-password" minlength="12" maxlength="128" required>
                 </div>
 
                 <div class="campo-formulario">

@@ -33,3 +33,8 @@ export function buscarCuentas() {
         .sort({ nombre: 1, _id: 1 })
         .toArray();
 }
+
+export async function insertarCuenta(cuenta) {
+    const resultado = await baseDatos.collection("cuentas").insertOne(cuenta);
+    return resultado.insertedId.toString();
+}
