@@ -216,26 +216,20 @@ function gestionComputadores() {
         },
 
         editarComputador(id) {
-            const computador = this.computadores.find(
-                (computador) => computador.id === id
-            );
+            if (this.guardandoComputador) return;
 
-            if (!computador) {
-                return;
-            }
+            const computador = this.computadores.find(equipo => equipo.id === id);
+            if (!computador) return;
 
             if (this.tieneSesionActiva(computador)) {
-                alert(
-                    "No puedes editar este computador " +
-                    "mientras tenga una sesión activa."
-                );
+                alert("No puedes editar este computador mientras tenga una sesión activa.");
                 return;
             }
 
             this.idEdicion = computador.id;
             this.nombre = computador.nombre;
-            this.estado = computador.estado;
             this.ubicacion = computador.ubicacion;
+            this.estado = computador.estado;
             this.formularioVisible = true;
         },
 

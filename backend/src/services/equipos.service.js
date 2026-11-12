@@ -1,5 +1,7 @@
 import { buscarEquipos, insertarEquipo, actualizarEquipo } from "../repositories/equipos.repository.js";
 
+const UBICACIONES_VALIDAS = new Set(["Sala principal", "Sala secundaria"]);
+
 export async function listarEquipos() {
     const equipos = await buscarEquipos();
 
@@ -15,7 +17,7 @@ export async function registrarEquipo(datos) {
     const nombre = typeof datos?.nombre === "string" ? datos.nombre.trim() : "";
     const ubicacion = typeof datos?.ubicacion === "string" ? datos.ubicacion.trim() : "";
 
-    if (!nombre || nombre.length > 80 || !ubicacion || ubicacion.length > 120) {
+    if (!nombre || nombre.length > 80 || !UBICACIONES_VALIDAS.has(ubicacion)) {
         return null;
     }
 
@@ -49,6 +51,10 @@ export async function editarEquipo(id, datos) {
 
         const valor = datos[campo].trim();
         if (!valor || valor.length > limites[campo]) {
+            return { error: "DATOS_INVALIDOS" };
+        }
+
+        if (campo === "ubicacion" && !UBICACIONES_VALIDAS.has(valor)) {
             return { error: "DATOS_INVALIDOS" };
         }
 
