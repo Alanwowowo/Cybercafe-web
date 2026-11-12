@@ -26,3 +26,10 @@ export function buscarCuentaActivaPorId(id) {
         { projection: { nombre: 1, rol: 1 } }
     );
 }
+
+export function buscarCuentas() {
+    return baseDatos.collection("cuentas")
+        .find({}, { projection: { _id: 1, nombre: 1, correo: 1, rol: 1, estado: 1 } })
+        .sort({ nombre: 1, _id: 1 })
+        .toArray();
+}

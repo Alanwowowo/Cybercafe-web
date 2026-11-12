@@ -151,6 +151,19 @@ window.sesionCyberNetLista = (async function () {
             return respuesta.json();
         },
 
+        async listarCuentas() {
+            const respuesta = await fetch("/api/cuentas", {
+                headers: { Authorization: "Bearer " + accessToken },
+                cache: "no-store"
+            });
+
+            if (!respuesta.ok) {
+                throw new Error("No se pudieron cargar las cuentas (" + respuesta.status + ").");
+            }
+
+            return respuesta.json();
+        },
+
         async crearEquipo({ nombre, ubicacion }) {
             const respuesta = await fetch("/api/equipos", {
                 method: "POST",
@@ -198,6 +211,6 @@ window.sesionCyberNetLista = (async function () {
             }
 
             return respuesta.json();
-        },        
-    };    
+        },
+    };
 })();

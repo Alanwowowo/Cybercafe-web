@@ -365,14 +365,23 @@ function gestionCuentas() {
         filtroEstado: "todos",
         orden: "nombre-asc",
 
-        iniciar() {
-            const guardadas = localStorage.getItem("cybernet_cuentas");
+        async iniciar() {
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) return;
 
-            if (guardadas) {
-                this.cuentas = JSON.parse(guardadas);
-            } else {
-                this.cuentas = obtenerCuentasIniciales();
-                this.guardarEnStorage();
+                const cuentas = await sesion.listarCuentas();
+                const roles = new Map([
+                    ["administrador", "Administrador"],
+                    ["encargado", "Encargado"]
+                ]);
+
+                this.cuentas = cuentas.map(cuenta => ({
+                    ...cuenta,
+                    rol: roles.get(cuenta.rol) ?? cuenta.rol
+                }));
+            } catch (error) {
+                alert(error.message);
             }
         },
 

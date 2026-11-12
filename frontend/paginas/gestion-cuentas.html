@@ -63,7 +63,7 @@
                     <p>Administra las cuentas con acceso al sistema</p>
                 </div>
 
-                <button type="button" id="boton-agregar-cuenta" @click="abrirFormulario()">
+                <button type="button" id="boton-agregar-cuenta" @click="abrirFormulario()" disabled>
                     Agregar cuenta
                 </button>
             </div>
@@ -156,9 +156,11 @@
                                 </td>
                                 <td>
                                     <button type="button" class="boton-editar-cuenta"
+                                        disabled
                                         @click="editarCuenta(cuenta.id)">Editar</button>
 
                                     <button type="button" class="boton-eliminar-cuenta"
+                                        disabled
                                         @click="eliminarCuenta(cuenta.id)">Eliminar</button>
                                 </td>
                             </tr>

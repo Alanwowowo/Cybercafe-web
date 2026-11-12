@@ -7,11 +7,13 @@ import { prepararSesionesAcceso } from "./repositories/sesiones-acceso.repositor
 import { fileURLToPath } from "node:url";
 import { obtenerEquipos, crearEquipo, modificarEquipo, obtenerEquiposParaMapa  } from "./controllers/equipos.controller.js";
 import { prepararEquipos } from "./repositories/equipos.repository.js";
+import { obtenerCuentas } from "./controllers/cuentas.controller.js";
 
 const app = express();
 
 app.get("/api/equipos", requerirAuth, obtenerEquipos);
 app.get("/api/mapa-equipos", requerirAuth, obtenerEquiposParaMapa);
+app.get("/api/cuentas", requerirAuth, obtenerCuentas);
 app.post("/api/equipos", requerirAuth, express.json({ limit: "4kb" }), crearEquipo);
 app.patch("/api/equipos/:id", requerirAuth, express.json({ limit: "4kb" }), modificarEquipo);
 app.post("/api/auth/login", express.json({ limit: "4kb" }), login);
