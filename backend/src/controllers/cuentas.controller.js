@@ -1,4 +1,4 @@
-import { listarCuentas, registrarCuenta, editarCuenta } from "../services/cuentas.service.js";
+import { listarCuentas, registrarCuenta, editarCuenta, cambiarEstadoCuenta } from "../services/cuentas.service.js";
 
 export async function obtenerCuentas(req, res) {
     if (req.usuario.rol !== "administrador") {
@@ -58,4 +58,28 @@ export async function modificarCuenta(req, res, next) {
 
         return next(error);
     }
+}
+
+export async function modificarEstadoCuenta(req, res) {
+    if (req.usuario.rol !== "administrador") {
+        return res.status(403).json({
+            mensaje: "No tienes permiso para cambiar el estado de las cuentas.",
+        });
+    }
+
+    const resultado = await cambiarEstadoCuenta(req.params.id, req.body);
+
+    if (resultado.error === "DATOS_INVALIDOS") {
+        return res.status(400).json({
+            mensaje: "Revisa el identificador y envía un estado válido: activa o inactiva.",
+        });
+    }
+
+    if (resultado.error === "ENCARGADO_NO_ENCONTRADO") {
+        return res.status(404).json({
+            mensaje: "No se encontró una cuenta de encargado con ese identificador.",
+        });
+    }
+
+    return res.json(resultado.cuenta);
 }

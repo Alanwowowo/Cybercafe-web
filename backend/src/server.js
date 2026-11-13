@@ -7,7 +7,7 @@ import { prepararSesionesAcceso } from "./repositories/sesiones-acceso.repositor
 import { fileURLToPath } from "node:url";
 import { obtenerEquipos, crearEquipo, modificarEquipo, obtenerEquiposParaMapa  } from "./controllers/equipos.controller.js";
 import { prepararEquipos } from "./repositories/equipos.repository.js";
-import { obtenerCuentas, crearCuenta, modificarCuenta } from "./controllers/cuentas.controller.js";
+import { obtenerCuentas, crearCuenta, modificarCuenta, modificarEstadoCuenta } from "./controllers/cuentas.controller.js";
 
 const app = express();
 
@@ -16,6 +16,7 @@ app.get("/api/mapa-equipos", requerirAuth, obtenerEquiposParaMapa);
 app.get("/api/cuentas", requerirAuth, obtenerCuentas);
 app.post("/api/cuentas", requerirAuth, express.json({ limit: "4kb" }), crearCuenta);
 app.patch("/api/cuentas/:id", requerirAuth, express.json({ limit: "4kb" }), modificarCuenta);
+app.patch("/api/cuentas/:id/estado", requerirAuth, express.json({ limit: "4kb" }), modificarEstadoCuenta);
 app.post("/api/equipos", requerirAuth, express.json({ limit: "4kb" }), crearEquipo);
 app.patch("/api/equipos/:id", requerirAuth, express.json({ limit: "4kb" }), modificarEquipo);
 app.post("/api/auth/login", express.json({ limit: "4kb" }), login);

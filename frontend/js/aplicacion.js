@@ -213,6 +213,28 @@ window.sesionCyberNetLista = (async function () {
             return respuesta.json();
         },
 
+        async cambiarEstadoCuenta(id, estado) {
+            const respuesta = await fetch("/api/cuentas/" + encodeURIComponent(id) + "/estado", {
+                method: "PATCH",
+                headers: {
+                    Authorization: "Bearer " + accessToken,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ estado }),
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu acceso venció. Recarga la página e intenta de nuevo.");
+            }
+
+            if (!respuesta.ok) {
+                const error = await respuesta.json().catch(() => null);
+                throw new Error(error?.mensaje || "No se pudo cambiar el estado.");
+            }
+
+            return respuesta.json();
+        },
+
         async editarCuenta(id, { nombre, correo }) {
             const respuesta = await fetch("/api/cuentas/" + encodeURIComponent(id), {
                 method: "PATCH",

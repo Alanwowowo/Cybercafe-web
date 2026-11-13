@@ -7,9 +7,9 @@ export async function requerirAuth(req, res, next) {
     const encabezado = req.get("Authorization") ?? "";
     const coincidencia = /^Bearer +(\S+)$/i.exec(encabezado);
 
-    let id;
+    let acceso;
     try {
-        if (coincidencia) id = verificarTokenAcceso(coincidencia[1]);
+        if (coincidencia) acceso = verificarTokenAcceso(coincidencia[1]);
     } catch (error) {
         const codigo = error.name === "TokenExpiredError"
             ? "TOKEN_EXPIRED"
@@ -17,12 +17,12 @@ export async function requerirAuth(req, res, next) {
         return res.set("WWW-Authenticate", "Bearer").status(401).json({ codigo });
     }
 
-    const cuenta = id ? await buscarCuentaActivaPorId(id) : null;
-    if (!cuenta) {
+    const cuenta = acceso ? await buscarCuentaActivaPorId(acceso.id) : null;
+    if (!cuenta || acceso.versionAcceso !== (cuenta.versionAcceso ?? 0)) {
         return res.set("WWW-Authenticate", "Bearer").status(401)
             .json({ codigo: "NO_AUTORIZADO" });
     }
 
-    req.usuario = { id, nombre: cuenta.nombre, rol: cuenta.rol };
+    req.usuario = { id: acceso.id, nombre: cuenta.nombre, rol: cuenta.rol };
     next();
 }

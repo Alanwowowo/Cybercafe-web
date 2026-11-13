@@ -9,8 +9,8 @@ function claveFirma() {
     return Buffer.from(secreto, "hex");
 }
 
-export function crearTokenAcceso(usuarioId) {
-    return jwt.sign({}, claveFirma(), {
+export function crearTokenAcceso(usuarioId, versionAcceso) {
+    return jwt.sign({ versionAcceso }, claveFirma(), {
         algorithm: "HS256",
         subject: usuarioId,
         issuer: "cybernet",
@@ -32,7 +32,12 @@ export function verificarTokenAcceso(token) {
         throw new Error("Token inválido.");
     }
 
-    return datos.sub;
+    const versionAcceso = datos.versionAcceso ?? 0;
+    if (!Number.isSafeInteger(versionAcceso) || versionAcceso < 0) {
+        throw new Error("Token inválido.");
+    }
+
+    return { id: datos.sub, versionAcceso };
 }
 
 export const DURACION_REFRESH_MS = 7 * 24 * 60 * 60 * 1000;

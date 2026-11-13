@@ -167,6 +167,13 @@
                                     <button type="button" class="boton-editar-cuenta"
                                         @click="editarCuenta(cuenta.id)">Editar</button>
 
+                                    <button type="button" class="boton-editar"
+                                        x-show="cuenta.rol === 'Encargado'"
+                                        :disabled="guardandoCuenta || formularioVisible"
+                                        @click="cambiarEstadoCuenta(cuenta.id)"
+                                        x-text="cuenta.estado === 'activa' ? 'Desactivar' : 'Activar'">
+                                    </button>
+
                                     <button type="button" class="boton-eliminar-cuenta"
                                         disabled
                                         @click="eliminarCuenta(cuenta.id)">Eliminar</button>

@@ -14,14 +14,16 @@ import {
 } from "../repositories/sesiones-acceso.repository.js";
 
 export async function iniciarSesion(correo, contrasena) {
-    const usuario = await validarCredenciales(correo, contrasena);
-    if (!usuario) return null;
+    const credenciales = await validarCredenciales(correo, contrasena);
+    if (!credenciales) return null;
 
-    const accessToken = crearTokenAcceso(usuario.id);
+    const { versionAcceso, ...usuario } = credenciales;
+    const accessToken = crearTokenAcceso(usuario.id, versionAcceso);
     const refreshToken = crearRefreshToken();
 
     await guardarSesionAcceso({
         cuentaId: usuario.id,
+        versionAcceso,
         refreshHash: hashRefresh(refreshToken),
         venceEn: new Date(Date.now() + DURACION_REFRESH_MS),
     });
@@ -50,18 +52,25 @@ export async function validarCredenciales(correo, contrasena) {
 
     if (!coincide || !cuenta || cuenta.estado !== "activa") return null;
 
-    return { id: cuenta._id.toString(), nombre: cuenta.nombre, rol: cuenta.rol };
+    return {
+        id: cuenta._id.toString(),
+        nombre: cuenta.nombre,
+        rol: cuenta.rol,
+        versionAcceso: cuenta.versionAcceso ?? 0,
+    };
 }
 
 export async function renovarSesion(tokenActual) {
     const hashActual = hashRefresh(tokenActual);
     const sesion = await buscarSesionVigente(hashActual);
     if (!sesion) return null;
-
     const cuenta = await buscarCuentaActivaPorId(sesion.cuentaId);
     if (!cuenta) return null;
 
-    const accessToken = crearTokenAcceso(sesion.cuentaId);
+    const versionAcceso = sesion.versionAcceso ?? 0;
+    if (versionAcceso !== (cuenta.versionAcceso ?? 0)) return null;
+
+    const accessToken = crearTokenAcceso(sesion.cuentaId, versionAcceso);
     const refreshToken = crearRefreshToken();
     const rotado = await rotarRefreshHash(
         sesion._id, hashActual, hashRefresh(refreshToken),

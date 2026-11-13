@@ -449,6 +449,31 @@ function gestionCuentas() {
             }
         },
 
+        async cambiarEstadoCuenta(id) {
+            if (this.guardandoCuenta || this.formularioVisible) return;
+
+            const cuenta = this.cuentas.find(actual => actual.id === id);
+            if (!cuenta || cuenta.rol !== "Encargado") return;
+
+            const estado = cuenta.estado === "activa" ? "inactiva" : "activa";
+            const accion = estado === "inactiva" ? "Desactivar" : "Activar";
+            if (!confirm(`¿${accion} la cuenta de ${cuenta.nombre}?`)) return;
+
+            this.guardandoCuenta = true;
+
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
+
+                const actualizada = await sesion.cambiarEstadoCuenta(id, estado);
+                cuenta.estado = actualizada.estado;
+            } catch (error) {
+                alert(error.message || "No se pudo cambiar el estado.");
+            } finally {
+                this.guardandoCuenta = false;
+            }
+        },
+
         editarCuenta(id) {
             const cuenta = this.cuentas.find((cuenta) => cuenta.id === id);
 

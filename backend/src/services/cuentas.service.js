@@ -2,6 +2,7 @@ import {
     buscarCuentas,
     insertarCuenta,
     actualizarDatosCuenta,
+    actualizarEstadoEncargado,
 } from "../repositories/cuentas.repository.js";
 import { generarHash } from "../contrasenas.js";
 
@@ -87,6 +88,24 @@ export async function editarCuenta(id, datos) {
     const cuenta = await actualizarDatosCuenta(id, cambios);
     if (!cuenta) {
         return { error: "CUENTA_NO_ENCONTRADA" };
+    }
+
+    return { cuenta: cuentaPublica(cuenta) };
+}
+
+export async function cambiarEstadoCuenta(id, datos) {
+    if (
+        typeof id !== "string" || !/^[a-f0-9]{24}$/i.test(id) ||
+        !datos || typeof datos !== "object" || Array.isArray(datos) ||
+        Object.keys(datos).length !== 1 || !Object.hasOwn(datos, "estado") ||
+        !["activa", "inactiva"].includes(datos.estado)
+    ) {
+        return { error: "DATOS_INVALIDOS" };
+    }
+
+    const cuenta = await actualizarEstadoEncargado(id, datos.estado);
+    if (!cuenta) {
+        return { error: "ENCARGADO_NO_ENCONTRADO" };
     }
 
     return { cuenta: cuentaPublica(cuenta) };

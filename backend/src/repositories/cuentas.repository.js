@@ -23,7 +23,7 @@ export function buscarCuentaPorCorreo(correo) {
 export function buscarCuentaActivaPorId(id) {
     return baseDatos.collection("cuentas").findOne(
         { _id: new ObjectId(id), estado: "activa" },
-        { projection: { nombre: 1, rol: 1 } }
+        { projection: { nombre: 1, rol: 1, versionAcceso: 1 } }
     );
 }
 
@@ -43,6 +43,23 @@ export function actualizarDatosCuenta(id, cambios) {
     return baseDatos.collection("cuentas").findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: cambios },
+        {
+            returnDocument: "after",
+            projection: { _id: 1, nombre: 1, correo: 1, rol: 1, estado: 1 },
+        }
+    );
+}
+
+export function actualizarEstadoEncargado(id, estado) {
+    const cambios = { $set: { estado } };
+
+    if (estado === "inactiva") {
+        cambios.$inc = { versionAcceso: 1 };
+    }
+
+    return baseDatos.collection("cuentas").findOneAndUpdate(
+        { _id: new ObjectId(id), rol: "encargado" },
+        cambios,
         {
             returnDocument: "after",
             projection: { _id: 1, nombre: 1, correo: 1, rol: 1, estado: 1 },
