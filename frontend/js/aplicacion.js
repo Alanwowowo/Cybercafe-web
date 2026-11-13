@@ -257,6 +257,43 @@ window.sesionCyberNetLista = (async function () {
             return respuesta.json();
         },
 
+        async listarClientes() {
+            const respuesta = await fetch("/api/clientes", {
+                headers: { Authorization: "Bearer " + accessToken },
+                cache: "no-store",
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu acceso venció. Recarga la página e intenta de nuevo.");
+            }
+            if (!respuesta.ok) {
+                throw new Error("No se pudo cargar el listado de clientes.");
+            }
+
+            return respuesta.json();
+        },
+
+        async crearCliente({ rut, nombre, correo }) {
+            const respuesta = await fetch("/api/clientes", {
+                method: "POST",
+                headers: {
+                    Authorization: "Bearer " + accessToken,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ rut, nombre, correo }),
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu acceso venció. Recarga la página e intenta de nuevo.");
+            }
+            if (!respuesta.ok) {
+                const error = await respuesta.json().catch(() => null);
+                throw new Error(error?.mensaje || "No se pudo registrar el cliente.");
+            }
+
+            return respuesta.json();
+        },
+
         async crearCuenta(datos) {
             const respuesta = await fetch("/api/cuentas", {
                 method: "POST",

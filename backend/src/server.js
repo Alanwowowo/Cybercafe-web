@@ -8,12 +8,16 @@ import { fileURLToPath } from "node:url";
 import { obtenerEquipos, crearEquipo, modificarEquipo, obtenerEquiposParaMapa  } from "./controllers/equipos.controller.js";
 import { prepararEquipos } from "./repositories/equipos.repository.js";
 import { obtenerCuentas, crearCuenta, modificarCuenta, modificarEstadoCuenta } from "./controllers/cuentas.controller.js";
+import { prepararClientes } from "./repositories/clientes.repository.js";
+import { obtenerClientes, crearCliente } from "./controllers/clientes.controller.js";
 
 const app = express();
 
 app.get("/api/equipos", requerirAuth, obtenerEquipos);
 app.get("/api/mapa-equipos", requerirAuth, obtenerEquiposParaMapa);
 app.get("/api/cuentas", requerirAuth, obtenerCuentas);
+app.get("/api/clientes", requerirAuth, obtenerClientes);
+app.post("/api/clientes", requerirAuth, express.json({ limit: "4kb" }), crearCliente);
 app.post("/api/cuentas", requerirAuth, express.json({ limit: "4kb" }), crearCuenta);
 app.patch("/api/cuentas/:id", requerirAuth, express.json({ limit: "4kb" }), modificarCuenta);
 app.patch("/api/cuentas/:id/estado", requerirAuth, express.json({ limit: "4kb" }), modificarEstadoCuenta);
@@ -39,6 +43,7 @@ console.log("Índice de cuentas listo:", indice);
 
 await prepararSesionesAcceso();
 await prepararEquipos();
+await prepararClientes();
 
 app.post("/api/auth/refresh", refresh);
 app.post("/api/auth/logout", logout);

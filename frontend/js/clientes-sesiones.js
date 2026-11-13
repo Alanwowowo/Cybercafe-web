@@ -1,6 +1,8 @@
 document.addEventListener('alpine:init', () => {
   Alpine.data('gestionClientesSesiones', () => ({
     clientes: [],
+    cargandoClientes: true,
+    guardandoCliente: false,
     computadores: [],
     historial: [],
     sesionesActivas: [],
@@ -152,18 +154,22 @@ document.addEventListener('alpine:init', () => {
       return true;
     },
 
-    cargarClientes() {
-      const guardados = localStorage.getItem('cybernet_clientes');
-      if (guardados) {
-        this.clientes = JSON.parse(guardados);
-      } else {
-        this.clientes = [
-          { id: '12345678-9', nombre: 'Jorge Gonzalez', correo: 'jorge@ejemplo.com' },
-          { id: '98765432-1', nombre: 'Alvaro Herreros', correo: 'alvaro@ejemplo.com' },
-          { id: '32323345-5', nombre: 'Pablo Paez', correo: 'pablo@ejemplo.com' }
-        ];
-        this.guardarClientes();
-      }
+    async cargarClientes() {
+        try {
+            const sesion = await window.sesionCyberNetLista;
+            if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
+
+            const clientes = await sesion.listarClientes();
+            this.clientes = clientes.map(cliente => ({
+                ...cliente,
+                mongoId: cliente.id,
+                id: cliente.rut,
+            }));
+        } catch (error) {
+            this.mensajeError = error.message || 'No se pudo cargar el listado de clientes.';
+        } finally {
+            this.cargandoClientes = false;
+        }
     },
 
     guardarClientes() {
@@ -200,56 +206,52 @@ document.addEventListener('alpine:init', () => {
       localStorage.setItem('cybernet_historial', JSON.stringify(this.historial));
     },
 
-    guardarCliente() {
-      this.mensajeError = '';
-      this.mensajeExito = '';
+    async guardarCliente() {
+        if (this.cargandoClientes || this.guardandoCliente || this.posicionEdicion !== -1) return;
 
-      const id = this.clienteForm.id.trim();
-      const nombre = this.clienteForm.nombre.trim();
-      const correo = this.clienteForm.correo.trim();
+        this.mensajeError = '';
+        this.mensajeExito = '';
 
-      if (!id || !nombre || !correo) {
-        this.mensajeError = 'Todos los campos son obligatorios.';
-        return;
-      }
+        const rut = this.clienteForm.id.trim();
+        const nombre = this.clienteForm.nombre.trim();
+        const correo = this.clienteForm.correo.trim();
 
-      const rutRegex = /^(\d{1,2}\.\d{3}\.\d{3}-[\dkK]|\d{7,8}-[\dkK])$/;
-      if (!rutRegex.test(id)) {
-        this.mensajeError = 'Ingrese un RUT con formato válido (Ej: 12345678-9 o 12.345.678-K).';
-        return;
-      }
+        if (!rut || !nombre || !correo) {
+            this.mensajeError = 'Todos los campos son obligatorios.';
+            return;
+        }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(correo)) {
-        this.mensajeError = 'Ingrese un correo electrónico válido.';
-        return;
-      }
+        const rutRegex = /^(?:\d{1,2}\.\d{3}\.\d{3}|\d{7,8})-[0-9kK]$/;
+        if (!rutRegex.test(rut)) {
+            this.mensajeError = 'Ingrese un RUT con formato válido (Ej: 12345678-9 o 12.345.678-K).';
+            return;
+        }
 
-      const existeId = this.clientes.some((c, idx) => c.id.toLowerCase() === id.toLowerCase() && idx !== this.posicionEdicion);
-      if (existeId) {
-        this.mensajeError = 'Ya existe un cliente con este ID/RUT.';
-        return;
-      }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(correo)) {
+            this.mensajeError = 'Ingrese un correo electrónico válido.';
+            return;
+        }
 
-      const existeCorreo = this.clientes.some((c, idx) => c.correo.toLowerCase() === correo.toLowerCase() && idx !== this.posicionEdicion);
-      if (existeCorreo) {
-        this.mensajeError = 'Ya existe un cliente con este correo.';
-        return;
-      }
+        this.guardandoCliente = true;
+        try {
+            const sesion = await window.sesionCyberNetLista;
+            if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
 
-      const datosCliente = { id, nombre, correo };
+            const cliente = await sesion.crearCliente({ rut, nombre, correo });
+            this.clientes.push({
+                ...cliente,
+                mongoId: cliente.id,
+                id: cliente.rut,
+            });
 
-      if (this.posicionEdicion === -1) {
-        this.clientes.push(datosCliente);
-        this.mensajeExito = 'Cliente registrado correctamente.';
-      } else {
-        this.clientes[this.posicionEdicion] = datosCliente;
-        this.posicionEdicion = -1;
-        this.mensajeExito = 'Cliente actualizado correctamente.';
-      }
-
-      this.guardarClientes();
-      this.limpiarFormCliente();
+            this.limpiarFormCliente();
+            this.mensajeExito = 'Cliente registrado correctamente.';
+        } catch (error) {
+            this.mensajeError = error.message || 'No se pudo registrar el cliente.';
+        } finally {
+            this.guardandoCliente = false;
+        }
     },
 
     clienteTieneSesionActiva(cliente) {
