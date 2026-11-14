@@ -36,3 +36,10 @@ export function actualizarEquipo(id, cambios) {
         { returnDocument: "after" }
     );
 }
+
+export function buscarEquipoPorId(id) {
+    return equipos.findOne(
+        { _id: new ObjectId(id) },
+        { projection: { estado: 1 } }
+    );
+}

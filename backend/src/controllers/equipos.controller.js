@@ -15,7 +15,7 @@ export async function obtenerEquiposParaMapa(req, res) {
         return res.status(403).json({ mensaje: "No tienes permiso para ver el mapa." });
     }
 
-    return res.json(await listarEquipos());
+    return res.json(await listarEquipos({ incluirOcupacion: true }));
 }
 
 export async function crearEquipo(req, res) {

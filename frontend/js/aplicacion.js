@@ -257,6 +257,67 @@ window.sesionCyberNetLista = (async function () {
             return respuesta.json();
         },
 
+        async abrirSesionUso({ clienteId, equipoId }) {
+            const respuesta = await fetch("/api/sesiones-uso", {
+                method: "POST",
+                headers: {
+                    Authorization: "Bearer " + accessToken,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ clienteId, equipoId }),
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu acceso venció. Recarga la página e intenta de nuevo.");
+            }
+
+            if (!respuesta.ok) {
+                const error = await respuesta.json().catch(() => null);
+                throw new Error(error?.mensaje || "No se pudo iniciar la sesión.");
+            }
+
+            return respuesta.json();
+        },
+
+        async cerrarSesionUso(id, costosAdicionales = 0) {
+            const respuesta = await fetch("/api/sesiones-uso/" + encodeURIComponent(id) + "/cerrar", {
+                method: "PATCH",
+                headers: {
+                    Authorization: "Bearer " + accessToken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ costosAdicionales })
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu acceso venció. Recarga la página e intenta de nuevo.");
+            }
+
+            if (!respuesta.ok) {
+                const error = await respuesta.json().catch(() => null);
+                throw new Error(error?.mensaje || "No se pudo cerrar la sesión.");
+            }
+
+            return respuesta.json();
+        },
+
+        async listarSesionesUsoActivas() {
+            const respuesta = await fetch("/api/sesiones-uso/activas", {
+                headers: { Authorization: "Bearer " + accessToken },
+                cache: "no-store",
+            });
+
+            if (respuesta.status === 401) {
+                throw new Error("Tu acceso venció. Recarga la página e intenta de nuevo.");
+            }
+
+            if (!respuesta.ok) {
+                throw new Error("No se pudieron cargar las sesiones activas.");
+            }
+
+            return respuesta.json();
+        },        
+
         async listarClientes() {
             const respuesta = await fetch("/api/clientes", {
                 headers: { Authorization: "Bearer " + accessToken },

@@ -1,16 +1,24 @@
 import { buscarEquipos, insertarEquipo, actualizarEquipo } from "../repositories/equipos.repository.js";
+import { buscarIdsEquiposOcupados } from "../repositories/sesiones-uso.repository.js";
 
 const UBICACIONES_VALIDAS = new Set(["Sala principal", "Sala secundaria"]);
 
-export async function listarEquipos() {
+export async function listarEquipos({ incluirOcupacion = false } = {}) {
     const equipos = await buscarEquipos();
+    const ocupados = new Set(
+        incluirOcupacion ? await buscarIdsEquiposOcupados() : []
+    );
 
-    return equipos.map((equipo) => ({
-        id: equipo._id.toString(),
-        nombre: equipo.nombre,
-        estado: equipo.estado,
-        ubicacion: equipo.ubicacion,
-    }));
+    return equipos.map(equipo => {
+        const id = equipo._id.toString();
+
+        return {
+            id,
+            nombre: equipo.nombre,
+            estado: ocupados.has(id) ? "ocupado" : equipo.estado,
+            ubicacion: equipo.ubicacion,
+        };
+    });
 }
 
 export async function registrarEquipo(datos) {

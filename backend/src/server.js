@@ -9,7 +9,9 @@ import { obtenerEquipos, crearEquipo, modificarEquipo, obtenerEquiposParaMapa  }
 import { prepararEquipos } from "./repositories/equipos.repository.js";
 import { obtenerCuentas, crearCuenta, modificarCuenta, modificarEstadoCuenta } from "./controllers/cuentas.controller.js";
 import { prepararClientes } from "./repositories/clientes.repository.js";
+import { prepararSesionesUso } from "./repositories/sesiones-uso.repository.js";
 import { obtenerClientes, crearCliente } from "./controllers/clientes.controller.js";
+import { crearSesionUso, cerrarSesionUsoHttp, obtenerSesionesUsoActivas } from "./controllers/sesiones-uso.controller.js";
 
 const app = express();
 
@@ -18,9 +20,12 @@ app.get("/api/mapa-equipos", requerirAuth, obtenerEquiposParaMapa);
 app.get("/api/cuentas", requerirAuth, obtenerCuentas);
 app.get("/api/clientes", requerirAuth, obtenerClientes);
 app.post("/api/clientes", requerirAuth, express.json({ limit: "4kb" }), crearCliente);
+app.post("/api/sesiones-uso", requerirAuth, express.json({ limit: "4kb" }), crearSesionUso);
+app.get("/api/sesiones-uso/activas", requerirAuth, obtenerSesionesUsoActivas);
 app.post("/api/cuentas", requerirAuth, express.json({ limit: "4kb" }), crearCuenta);
 app.patch("/api/cuentas/:id", requerirAuth, express.json({ limit: "4kb" }), modificarCuenta);
 app.patch("/api/cuentas/:id/estado", requerirAuth, express.json({ limit: "4kb" }), modificarEstadoCuenta);
+app.patch("/api/sesiones-uso/:id/cerrar", requerirAuth, express.json({ limit: "4kb" }), cerrarSesionUsoHttp);
 app.post("/api/equipos", requerirAuth, express.json({ limit: "4kb" }), crearEquipo);
 app.patch("/api/equipos/:id", requerirAuth, express.json({ limit: "4kb" }), modificarEquipo);
 app.post("/api/auth/login", express.json({ limit: "4kb" }), login);
@@ -44,6 +49,9 @@ console.log("Índice de cuentas listo:", indice);
 await prepararSesionesAcceso();
 await prepararEquipos();
 await prepararClientes();
+
+const indiceSesionesUso = await prepararSesionesUso();
+console.log("Índice de sesiones de uso listo:", indiceSesionesUso);
 
 app.post("/api/auth/refresh", refresh);
 app.post("/api/auth/logout", logout);

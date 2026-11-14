@@ -50,7 +50,7 @@
         </div>
     </aside>
 
-    <div class="contenido-pagina" x-data="gestionClientesSesiones">
+    <div class="contenido-pagina" x-data="gestionClientesSesiones(true)">
         <header>
             <h1>Registro y cierre de sesión</h1>
             <p>Sistema de gestión del cibercafé</p>
@@ -60,13 +60,13 @@
             <section>
                 <h3>Iniciar nueva sesión</h3>
 
-                <form id="inicio-sesion" @submit.prevent="iniciarSesion()">
+                <form id="inicio-sesion" @submit.prevent="iniciarSesionDesdeApi()" :disabled="guardandoSesionUso || cargandoSesionesUso">
                     <div>
                         <label for="select-cliente">Cliente:</label>
                         <select id="select-cliente" x-model="selectCliente" required>
                             <option value="">Selecciona un cliente</option>
-                            <template x-for="cliente in clientes" :key="cliente.id">
-                                <option :value="cliente.id" x-text="cliente.nombre"></option>
+                            <template x-for="cliente in clientes" :key="cliente.mongoId">
+                                <option :value="cliente.mongoId" x-text="cliente.nombre"></option>
                             </template>
                         </select>
                     </div>
@@ -75,8 +75,8 @@
                         <label for="select-computador">Computador:</label>
                         <select id="select-computador" x-model="selectComputador" required>
                             <option value="">Selecciona un computador</option>
-                            <template x-for="equipo in computadores" :key="equipo.id || equipo">
-                                <option :value="equipo.nombre || equipo" x-text="equipo.nombre || equipo"></option>
+                            <template x-for="equipo in computadores" :key="equipo.id">
+                                <option :value="equipo.id" x-text="equipo.nombre"></option>
                             </template>
                         </select>
                     </div>
@@ -87,8 +87,9 @@
 
             <section>
                 <h3>Sesiones activas</h3>
+                <p x-show="mensajeError" x-text="mensajeError"></p>
 
-                <template x-if="sesionesActivas.length === 0">
+                <template x-if="!cargandoSesionesUso && !mensajeError && sesionesActivas.length === 0">
                     <p>No hay sesiones activas en este momento.</p>
                 </template>
 
@@ -101,10 +102,10 @@
                         
                         <div>
                             <label>Costos extras ($):</label>
-                            <input type="number" x-model.number="sesion.costosAdicionales" min="0" placeholder="0">
+                            <input type="number" x-model.number="sesion.costosAdicionales" min="0" placeholder="0" :disabled="guardandoSesionUso || cargandoSesionesUso">
                         </div>
 
-                        <button type="button" @click="finalizarSesion(sesion)">
+                        <button type="button" @click="finalizarSesionDesdeApi(sesion)" :disabled="guardandoSesionUso || cargandoSesionesUso">
                             Finalizar y cobrar
                         </button>
                     </div>

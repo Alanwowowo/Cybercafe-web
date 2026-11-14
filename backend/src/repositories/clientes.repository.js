@@ -1,4 +1,5 @@
 import { baseDatos } from "../db.js";
+import { ObjectId } from "mongodb";
 
 const clientes = baseDatos.collection("clientes");
 
@@ -22,4 +23,11 @@ export function buscarClientes() {
 export async function insertarCliente(cliente) {
     const resultado = await clientes.insertOne(cliente);
     return resultado.insertedId.toString();
+}
+
+export function buscarClientePorId(id) {
+    return clientes.findOne(
+        { _id: new ObjectId(id) },
+        { projection: { _id: 1 } }
+    );
 }

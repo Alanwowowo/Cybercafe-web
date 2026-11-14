@@ -1,11 +1,13 @@
 document.addEventListener('alpine:init', () => {
-  Alpine.data('gestionClientesSesiones', () => ({
+  Alpine.data('gestionClientesSesiones', (usarSesionesApi = false) => ({
     clientes: [],
     cargandoClientes: true,
     guardandoCliente: false,
     computadores: [],
     historial: [],
     sesionesActivas: [],
+    cargandoSesionesUso: true,
+    guardandoSesionUso: false,
     precioHora: 1500,
 
     clienteForm: { id: '', nombre: '', correo: '' },
@@ -27,6 +29,10 @@ document.addEventListener('alpine:init', () => {
 
     init() {
       this.cargarConfiguracionChris();
+      if (usarSesionesApi) {
+        this.cargarSesionesDesdeApi();
+        return;
+      }
       this.cargarComputadoresAlan();
       this.cargarClientes();
       this.cargarSesionesActivas();
@@ -174,6 +180,44 @@ document.addEventListener('alpine:init', () => {
 
     guardarClientes() {
       localStorage.setItem('cybernet_clientes', JSON.stringify(this.clientes));
+    },
+
+    async cargarSesionesDesdeApi() {
+      this.cargandoSesionesUso = true;
+      this.mensajeError = '';
+
+      try {
+        const sesion = await window.sesionCyberNetLista;
+        if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
+
+        await this.cargarClientes();
+
+        const [equipos, activas] = await Promise.all([
+          sesion.listarEquipos({ paraMapa: true }),
+          sesion.listarSesionesUsoActivas()
+        ]);
+
+        this.computadores = equipos.filter(equipo => equipo.estado === 'disponible');
+        this.sesionesActivas = activas.map(activa => ({
+          id: activa.id,
+          clienteId: activa.clienteId,
+          computadorId: activa.equipoId,
+          cliente: this.clientes.find(cliente => cliente.mongoId === activa.clienteId)?.nombre
+            ?? 'Cliente no encontrado',
+          computador: equipos.find(equipo => equipo.id === activa.equipoId)?.nombre
+            ?? 'Equipo no encontrado',
+          horaInicio: new Date(activa.inicio).getTime(),
+          horaInicioTexto: new Date(activa.inicio).toLocaleTimeString('es-CL', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          costosAdicionales: 0
+        }));
+      } catch (error) {
+        this.mensajeError = error.message || 'No se pudieron cargar las sesiones activas.';
+      } finally {
+        this.cargandoSesionesUso = false;
+      }
     },
 
     cargarSesionesActivas() {
@@ -352,6 +396,36 @@ document.addEventListener('alpine:init', () => {
       return resultado;
     },
 
+    async iniciarSesionDesdeApi() {
+      if (this.guardandoSesionUso || this.cargandoSesionesUso) return;
+
+      const clienteId = this.selectCliente;
+      const equipoId = this.selectComputador;
+
+      if (!clienteId || !equipoId) {
+        this.mensajeError = 'Selecciona un cliente y un computador.';
+        return;
+      }
+
+      this.mensajeError = '';
+      this.guardandoSesionUso = true;
+
+      try {
+        const sesion = await window.sesionCyberNetLista;
+        if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
+
+        await sesion.abrirSesionUso({ clienteId, equipoId });
+
+        this.selectCliente = '';
+        this.selectComputador = '';
+        await this.cargarSesionesDesdeApi();
+      } catch (error) {
+        this.mensajeError = error.message || 'No se pudo iniciar la sesión.';
+      } finally {
+        this.guardandoSesionUso = false;
+      }
+    },
+
     iniciarSesion() {
       if (!this.selectCliente || !this.selectComputador) {
         alert('Selecciona un cliente y un computador.');
@@ -437,6 +511,38 @@ document.addEventListener('alpine:init', () => {
 
       this.selectCliente = '';
       this.selectComputador = '';
+    },
+
+    async finalizarSesionDesdeApi(activa) {
+      if (!activa || this.guardandoSesionUso || this.cargandoSesionesUso) return;
+
+      this.mensajeError = '';
+
+      const costosAdicionales = Number(activa.costosAdicionales ?? 0);
+      if (!Number.isSafeInteger(costosAdicionales) || costosAdicionales < 0) {
+        this.mensajeError = 'Los extras deben ser un monto entero y no negativo.';
+        return;
+      }
+
+      if (!confirm(`¿Deseas finalizar la sesión de ${activa.cliente}?`)) return;
+
+      this.guardandoSesionUso = true;
+
+      try {
+        const sesion = await window.sesionCyberNetLista;
+        if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
+
+        const cerrada = await sesion.cerrarSesionUso(activa.id, costosAdicionales);
+
+        this.sesionesActivas = this.sesionesActivas.filter(s => s.id !== activa.id);
+        await this.cargarSesionesDesdeApi();
+
+        alert(`Sesión finalizada. Total a cobrar: $${cerrada.monto.toLocaleString('es-CL')}`);
+      } catch (error) {
+        this.mensajeError = error.message || 'No se pudo finalizar la sesión.';
+      } finally {
+        this.guardandoSesionUso = false;
+      }
     },
 
     finalizarSesion(sesionAProcesar) {
