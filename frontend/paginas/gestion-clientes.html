@@ -76,7 +76,8 @@
                         <input type="email" id="correo-cliente" x-model="clienteForm.correo" placeholder="correo@ejemplo.com">
                     </div>
 
-                    <button type="submit" x-text="posicionEdicion === -1 ? 'Registrar Cliente' : 'Guardar Cambios'"></button>
+                    <button type="submit" :disabled="cargandoClientes || guardandoCliente"
+                        x-text="posicionEdicion === -1 ? 'Registrar Cliente' : 'Guardar Cambios'"></button>
                     <button type="button" x-show="posicionEdicion !== -1" @click="limpiarFormCliente()">Cancelar</button>
                 </form>
 
@@ -117,8 +118,8 @@
                                     <td x-text="cliente.nombre"></td>
                                     <td x-text="cliente.correo"></td>
                                     <td>
-                                        <button type="button" @click="editarCliente(cliente)">Editar</button>
-                                        <button type="button" @click="eliminarCliente(cliente.id)">Eliminar</button>
+                                        <button type="button" disabled @click="editarCliente(cliente)">Editar</button>
+                                        <button type="button" disabled @click="eliminarCliente(cliente.id)">Eliminar</button>
                                     </td>
                                 </tr>
                             </template>

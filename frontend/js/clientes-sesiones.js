@@ -1,9 +1,13 @@
 document.addEventListener('alpine:init', () => {
-  Alpine.data('gestionClientesSesiones', () => ({
+  Alpine.data('gestionClientesSesiones', (usarSesionesApi = false) => ({
     clientes: [],
+    cargandoClientes: true,
+    guardandoCliente: false,
     computadores: [],
     historial: [],
     sesionesActivas: [],
+    cargandoSesionesUso: true,
+    guardandoSesionUso: false,
     precioHora: 1500,
 
     clienteForm: { id: '', nombre: '', correo: '' },
@@ -25,6 +29,10 @@ document.addEventListener('alpine:init', () => {
 
     init() {
       this.cargarConfiguracionChris();
+      if (usarSesionesApi) {
+        this.cargarSesionesDesdeApi();
+        return;
+      }
       this.cargarComputadoresAlan();
       this.cargarClientes();
       this.cargarSesionesActivas();
@@ -152,22 +160,64 @@ document.addEventListener('alpine:init', () => {
       return true;
     },
 
-    cargarClientes() {
-      const guardados = localStorage.getItem('cybernet_clientes');
-      if (guardados) {
-        this.clientes = JSON.parse(guardados);
-      } else {
-        this.clientes = [
-          { id: '12345678-9', nombre: 'Jorge Gonzalez', correo: 'jorge@ejemplo.com' },
-          { id: '98765432-1', nombre: 'Alvaro Herreros', correo: 'alvaro@ejemplo.com' },
-          { id: '32323345-5', nombre: 'Pablo Paez', correo: 'pablo@ejemplo.com' }
-        ];
-        this.guardarClientes();
-      }
+    async cargarClientes() {
+        try {
+            const sesion = await window.sesionCyberNetLista;
+            if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
+
+            const clientes = await sesion.listarClientes();
+            this.clientes = clientes.map(cliente => ({
+                ...cliente,
+                mongoId: cliente.id,
+                id: cliente.rut,
+            }));
+        } catch (error) {
+            this.mensajeError = error.message || 'No se pudo cargar el listado de clientes.';
+        } finally {
+            this.cargandoClientes = false;
+        }
     },
 
     guardarClientes() {
       localStorage.setItem('cybernet_clientes', JSON.stringify(this.clientes));
+    },
+
+    async cargarSesionesDesdeApi() {
+      this.cargandoSesionesUso = true;
+      this.mensajeError = '';
+
+      try {
+        const sesion = await window.sesionCyberNetLista;
+        if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
+
+        await this.cargarClientes();
+
+        const [equipos, activas] = await Promise.all([
+          sesion.listarEquipos({ paraMapa: true }),
+          sesion.listarSesionesUsoActivas()
+        ]);
+
+        this.computadores = equipos.filter(equipo => equipo.estado === 'disponible');
+        this.sesionesActivas = activas.map(activa => ({
+          id: activa.id,
+          clienteId: activa.clienteId,
+          computadorId: activa.equipoId,
+          cliente: this.clientes.find(cliente => cliente.mongoId === activa.clienteId)?.nombre
+            ?? 'Cliente no encontrado',
+          computador: equipos.find(equipo => equipo.id === activa.equipoId)?.nombre
+            ?? 'Equipo no encontrado',
+          horaInicio: new Date(activa.inicio).getTime(),
+          horaInicioTexto: new Date(activa.inicio).toLocaleTimeString('es-CL', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          costosAdicionales: 0
+        }));
+      } catch (error) {
+        this.mensajeError = error.message || 'No se pudieron cargar las sesiones activas.';
+      } finally {
+        this.cargandoSesionesUso = false;
+      }
     },
 
     cargarSesionesActivas() {
@@ -200,56 +250,52 @@ document.addEventListener('alpine:init', () => {
       localStorage.setItem('cybernet_historial', JSON.stringify(this.historial));
     },
 
-    guardarCliente() {
-      this.mensajeError = '';
-      this.mensajeExito = '';
+    async guardarCliente() {
+        if (this.cargandoClientes || this.guardandoCliente || this.posicionEdicion !== -1) return;
 
-      const id = this.clienteForm.id.trim();
-      const nombre = this.clienteForm.nombre.trim();
-      const correo = this.clienteForm.correo.trim();
+        this.mensajeError = '';
+        this.mensajeExito = '';
 
-      if (!id || !nombre || !correo) {
-        this.mensajeError = 'Todos los campos son obligatorios.';
-        return;
-      }
+        const rut = this.clienteForm.id.trim();
+        const nombre = this.clienteForm.nombre.trim();
+        const correo = this.clienteForm.correo.trim();
 
-      const rutRegex = /^(\d{1,2}\.\d{3}\.\d{3}-[\dkK]|\d{7,8}-[\dkK])$/;
-      if (!rutRegex.test(id)) {
-        this.mensajeError = 'Ingrese un RUT con formato válido (Ej: 12345678-9 o 12.345.678-K).';
-        return;
-      }
+        if (!rut || !nombre || !correo) {
+            this.mensajeError = 'Todos los campos son obligatorios.';
+            return;
+        }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(correo)) {
-        this.mensajeError = 'Ingrese un correo electrónico válido.';
-        return;
-      }
+        const rutRegex = /^(?:\d{1,2}\.\d{3}\.\d{3}|\d{7,8})-[0-9kK]$/;
+        if (!rutRegex.test(rut)) {
+            this.mensajeError = 'Ingrese un RUT con formato válido (Ej: 12345678-9 o 12.345.678-K).';
+            return;
+        }
 
-      const existeId = this.clientes.some((c, idx) => c.id.toLowerCase() === id.toLowerCase() && idx !== this.posicionEdicion);
-      if (existeId) {
-        this.mensajeError = 'Ya existe un cliente con este ID/RUT.';
-        return;
-      }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(correo)) {
+            this.mensajeError = 'Ingrese un correo electrónico válido.';
+            return;
+        }
 
-      const existeCorreo = this.clientes.some((c, idx) => c.correo.toLowerCase() === correo.toLowerCase() && idx !== this.posicionEdicion);
-      if (existeCorreo) {
-        this.mensajeError = 'Ya existe un cliente con este correo.';
-        return;
-      }
+        this.guardandoCliente = true;
+        try {
+            const sesion = await window.sesionCyberNetLista;
+            if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
 
-      const datosCliente = { id, nombre, correo };
+            const cliente = await sesion.crearCliente({ rut, nombre, correo });
+            this.clientes.push({
+                ...cliente,
+                mongoId: cliente.id,
+                id: cliente.rut,
+            });
 
-      if (this.posicionEdicion === -1) {
-        this.clientes.push(datosCliente);
-        this.mensajeExito = 'Cliente registrado correctamente.';
-      } else {
-        this.clientes[this.posicionEdicion] = datosCliente;
-        this.posicionEdicion = -1;
-        this.mensajeExito = 'Cliente actualizado correctamente.';
-      }
-
-      this.guardarClientes();
-      this.limpiarFormCliente();
+            this.limpiarFormCliente();
+            this.mensajeExito = 'Cliente registrado correctamente.';
+        } catch (error) {
+            this.mensajeError = error.message || 'No se pudo registrar el cliente.';
+        } finally {
+            this.guardandoCliente = false;
+        }
     },
 
     clienteTieneSesionActiva(cliente) {
@@ -350,6 +396,36 @@ document.addEventListener('alpine:init', () => {
       return resultado;
     },
 
+    async iniciarSesionDesdeApi() {
+      if (this.guardandoSesionUso || this.cargandoSesionesUso) return;
+
+      const clienteId = this.selectCliente;
+      const equipoId = this.selectComputador;
+
+      if (!clienteId || !equipoId) {
+        this.mensajeError = 'Selecciona un cliente y un computador.';
+        return;
+      }
+
+      this.mensajeError = '';
+      this.guardandoSesionUso = true;
+
+      try {
+        const sesion = await window.sesionCyberNetLista;
+        if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
+
+        await sesion.abrirSesionUso({ clienteId, equipoId });
+
+        this.selectCliente = '';
+        this.selectComputador = '';
+        await this.cargarSesionesDesdeApi();
+      } catch (error) {
+        this.mensajeError = error.message || 'No se pudo iniciar la sesión.';
+      } finally {
+        this.guardandoSesionUso = false;
+      }
+    },
+
     iniciarSesion() {
       if (!this.selectCliente || !this.selectComputador) {
         alert('Selecciona un cliente y un computador.');
@@ -435,6 +511,38 @@ document.addEventListener('alpine:init', () => {
 
       this.selectCliente = '';
       this.selectComputador = '';
+    },
+
+    async finalizarSesionDesdeApi(activa) {
+      if (!activa || this.guardandoSesionUso || this.cargandoSesionesUso) return;
+
+      this.mensajeError = '';
+
+      const costosAdicionales = Number(activa.costosAdicionales ?? 0);
+      if (!Number.isSafeInteger(costosAdicionales) || costosAdicionales < 0) {
+        this.mensajeError = 'Los extras deben ser un monto entero y no negativo.';
+        return;
+      }
+
+      if (!confirm(`¿Deseas finalizar la sesión de ${activa.cliente}?`)) return;
+
+      this.guardandoSesionUso = true;
+
+      try {
+        const sesion = await window.sesionCyberNetLista;
+        if (!sesion) throw new Error('Recarga la página para verificar tu sesión.');
+
+        const cerrada = await sesion.cerrarSesionUso(activa.id, costosAdicionales);
+
+        this.sesionesActivas = this.sesionesActivas.filter(s => s.id !== activa.id);
+        await this.cargarSesionesDesdeApi();
+
+        alert(`Sesión finalizada. Total a cobrar: $${cerrada.monto.toLocaleString('es-CL')}`);
+      } catch (error) {
+        this.mensajeError = error.message || 'No se pudo finalizar la sesión.';
+      } finally {
+        this.guardandoSesionUso = false;
+      }
     },
 
     finalizarSesion(sesionAProcesar) {

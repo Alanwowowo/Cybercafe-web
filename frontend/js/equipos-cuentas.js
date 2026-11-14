@@ -4,20 +4,14 @@ function gestionMapaEquipos() {
         computadores: [],
         filtroEstado: "todos",
 
-        iniciar() {
-            const guardados = localStorage.getItem(
-                "cybernet_computadores"
-            );
+        async iniciar() {
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) return;
 
-            if (guardados) {
-                this.computadores = JSON.parse(guardados);
-            } else {
-                this.computadores = obtenerComputadoresIniciales();
-
-                localStorage.setItem(
-                    "cybernet_computadores",
-                    JSON.stringify(this.computadores)
-                );
+                this.computadores = await sesion.listarEquipos({ paraMapa: true });
+            } catch {
+                alert("No se pudo cargar el mapa de equipos.");
             }
         },
 
@@ -108,7 +102,9 @@ function obtenerComputadoresIniciales() {
 function gestionComputadores() {
     return {
         computadores: [],
+        mensajeComputadores: "Cargando equipos...",
         formularioVisible: false,
+        guardandoComputador: false,
         idEdicion: null,
 
         nombre: "",
@@ -118,16 +114,15 @@ function gestionComputadores() {
         filtroEstado: "todos",
         orden: "nombre-asc",
 
-        iniciar() {
-            const guardados = localStorage.getItem(
-                "cybernet_computadores"
-            );
+        async iniciar() {
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) return;
 
-            if (guardados) {
-                this.computadores = JSON.parse(guardados);
-            } else {
-                this.computadores = obtenerComputadoresIniciales();
-                this.guardarEnStorage();
+                this.computadores = await sesion.listarEquipos();
+                this.mensajeComputadores = "Listado de MongoDB";
+            } catch {
+                this.mensajeComputadores = "No se pudo cargar el listado de equipos.";
             }
         },
 
@@ -154,49 +149,42 @@ function gestionComputadores() {
             this.ubicacion = "Sala principal";
         },
 
-        guardarComputador() {
-            const nombreLimpio = this.nombre.trim();
+        async guardarComputador() {
+            if (this.guardandoComputador) return;
 
-            if (nombreLimpio === "") {
-                alert("Debes ingresar el nombre del computador.");
+            const id = this.idEdicion;
+            const nombre = this.nombre.trim();
+            const ubicacion = this.ubicacion.trim();
+
+            if (!nombre || !ubicacion) {
+                alert("Ingresa el nombre y la ubicación del computador.");
                 return;
             }
 
-            const nombreRepetido = this.computadores.some(
-                (computador) =>
-                    computador.nombre.toLowerCase() ===
-                        nombreLimpio.toLowerCase() &&
-                    computador.id !== this.idEdicion
-            );
+            this.guardandoComputador = true;
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
 
-            if (nombreRepetido) {
-                alert("Ya existe un computador con ese nombre.");
-                return;
+                if (id === null) {
+                    const equipo = await sesion.crearEquipo({ nombre, ubicacion });
+                    this.computadores.push(equipo);
+                    this.mensajeComputadores = "Equipo agregado: " + equipo.nombre;
+                } else {
+                    const equipo = await sesion.editarEquipo(id, { nombre, ubicacion });
+                    this.computadores = this.computadores.map(
+                        computador => computador.id === id ? equipo : computador
+                    );
+                    this.mensajeComputadores = "Equipo actualizado: " + equipo.nombre;
+                }
+
+                this.formularioVisible = false;
+                this.idEdicion = null;
+            } catch (error) {
+                alert(error.message || "No se pudo guardar el equipo.");
+            } finally {
+                this.guardandoComputador = false;
             }
-
-            if (this.idEdicion === null) {
-                this.computadores.push({
-                    id: Date.now(),
-                    nombre: nombreLimpio,
-                    estado: this.estado,
-                    ubicacion: this.ubicacion
-                });
-            } else {
-                const indice = this.computadores.findIndex(
-                    (computador) =>
-                        computador.id === this.idEdicion
-                );
-
-                this.computadores.splice(indice, 1, {
-                    id: this.idEdicion,
-                    nombre: nombreLimpio,
-                    estado: this.estado,
-                    ubicacion: this.ubicacion
-                });
-            }
-
-            this.guardarEnStorage();
-            this.cancelarFormulario();
         },
 
         tieneSesionActiva(computador) {
@@ -222,26 +210,20 @@ function gestionComputadores() {
         },
 
         editarComputador(id) {
-            const computador = this.computadores.find(
-                (computador) => computador.id === id
-            );
+            if (this.guardandoComputador) return;
 
-            if (!computador) {
-                return;
-            }
+            const computador = this.computadores.find(equipo => equipo.id === id);
+            if (!computador) return;
 
             if (this.tieneSesionActiva(computador)) {
-                alert(
-                    "No puedes editar este computador " +
-                    "mientras tenga una sesión activa."
-                );
+                alert("No puedes editar este computador mientras tenga una sesión activa.");
                 return;
             }
 
             this.idEdicion = computador.id;
             this.nombre = computador.nombre;
-            this.estado = computador.estado;
             this.ubicacion = computador.ubicacion;
+            this.estado = computador.estado;
             this.formularioVisible = true;
         },
 
@@ -382,15 +364,26 @@ function gestionCuentas() {
         filtroRol: "todos",
         filtroEstado: "todos",
         orden: "nombre-asc",
+        contrasena: "",
+        guardandoCuenta: false,
 
-        iniciar() {
-            const guardadas = localStorage.getItem("cybernet_cuentas");
+        async iniciar() {
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) return;
 
-            if (guardadas) {
-                this.cuentas = JSON.parse(guardadas);
-            } else {
-                this.cuentas = obtenerCuentasIniciales();
-                this.guardarEnStorage();
+                const cuentas = await sesion.listarCuentas();
+                const roles = new Map([
+                    ["administrador", "Administrador"],
+                    ["encargado", "Encargado"]
+                ]);
+
+                this.cuentas = cuentas.map(cuenta => ({
+                    ...cuenta,
+                    rol: roles.get(cuenta.rol) ?? cuenta.rol
+                }));
+            } catch (error) {
+                alert(error.message);
             }
         },
 
@@ -408,6 +401,7 @@ function gestionCuentas() {
             this.rol = "Encargado";
             this.estado = "activa";
             this.formularioVisible = true;
+            this.contrasena = "";
         },
 
         cancelarFormulario() {
@@ -417,51 +411,67 @@ function gestionCuentas() {
             this.correo = "";
             this.rol = "Encargado";
             this.estado = "activa";
+            this.contrasena = "";
         },
 
-        guardarCuenta() {
-            const nombreLimpio = this.nombre.trim();
-            const correoLimpio = this.correo.trim().toLowerCase();
+        async guardarCuenta() {
+            if (this.guardandoCuenta) return;
 
-            if (nombreLimpio === "" || correoLimpio === "") {
-                alert("Debes completar el nombre y el correo.");
-                return;
+            const { idEdicion, nombre, correo, rol, estado, contrasena } = this;
+            this.guardandoCuenta = true;
+
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
+
+                const cuenta = idEdicion === null
+                    ? await sesion.crearCuenta({ nombre, correo, rol, estado, contrasena })
+                    : await sesion.editarCuenta(idEdicion, { nombre, correo });
+
+                const cuentaVisible = {
+                    ...cuenta,
+                    rol: cuenta.rol === "administrador" ? "Administrador" : "Encargado"
+                };
+
+                if (idEdicion === null) {
+                    this.cuentas.push(cuentaVisible);
+                } else {
+                    this.cuentas = this.cuentas.map(actual =>
+                        actual.id === idEdicion ? cuentaVisible : actual
+                    );
+                }
+
+                this.cancelarFormulario();
+            } catch (error) {
+                alert(error.message || "No se pudo guardar la cuenta.");
+            } finally {
+                this.guardandoCuenta = false;
             }
+        },
 
-            const correoRepetido = this.cuentas.some((cuenta) =>
-                cuenta.correo.toLowerCase() === correoLimpio &&
-                cuenta.id !== this.idEdicion
-            );
+        async cambiarEstadoCuenta(id) {
+            if (this.guardandoCuenta || this.formularioVisible) return;
 
-            if (correoRepetido) {
-                alert("Ya existe una cuenta con ese correo.");
-                return;
+            const cuenta = this.cuentas.find(actual => actual.id === id);
+            if (!cuenta || cuenta.rol !== "Encargado") return;
+
+            const estado = cuenta.estado === "activa" ? "inactiva" : "activa";
+            const accion = estado === "inactiva" ? "Desactivar" : "Activar";
+            if (!confirm(`¿${accion} la cuenta de ${cuenta.nombre}?`)) return;
+
+            this.guardandoCuenta = true;
+
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
+
+                const actualizada = await sesion.cambiarEstadoCuenta(id, estado);
+                cuenta.estado = actualizada.estado;
+            } catch (error) {
+                alert(error.message || "No se pudo cambiar el estado.");
+            } finally {
+                this.guardandoCuenta = false;
             }
-
-            if (this.idEdicion === null) {
-                this.cuentas.push({
-                    id: Date.now(),
-                    nombre: nombreLimpio,
-                    correo: correoLimpio,
-                    rol: this.rol,
-                    estado: this.estado
-                });
-            } else {
-                const indice = this.cuentas.findIndex(
-                    (cuenta) => cuenta.id === this.idEdicion
-                );
-
-                this.cuentas.splice(indice, 1, {
-                    id: this.idEdicion,
-                    nombre: nombreLimpio,
-                    correo: correoLimpio,
-                    rol: this.rol,
-                    estado: this.estado
-                });
-            }
-
-            this.guardarEnStorage();
-            this.cancelarFormulario();
         },
 
         editarCuenta(id) {

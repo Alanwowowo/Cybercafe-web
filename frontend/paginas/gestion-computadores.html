@@ -59,6 +59,7 @@
     <main>
         <section class="seccion-gestion-computadores"
             x-data="gestionComputadores()" x-init="iniciar()">
+            <p role="status" x-text="mensajeComputadores"></p>
 
             <div class="encabezado-seccion">
                 <div>
@@ -90,13 +91,8 @@
 
                 <div class="campo-formulario">
                     <label for="estado-computador">Estado:</label>
-                    <select id="estado-computador" x-model="estado" required>
-                        <option value="disponible">Disponible</option>
-                        <option value="ocupado">En uso</option>
-                        <option value="fuera-servicio">
-                            Fuera de servicio
-                        </option>
-                    </select>
+                    <input type="text" id="estado-computador"
+                        :value="textoEstado(estado)" readonly>
                 </div>
 
                 <div class="campo-formulario">
@@ -176,6 +172,7 @@
                                     </button>
 
                                     <button type="button" class="boton-eliminar"
+                                        disabled
                                         @click="eliminarComputador(computador.id)">
                                         Eliminar
                                     </button>
