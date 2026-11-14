@@ -40,9 +40,17 @@ export async function insertarCuenta(cuenta) {
 }
 
 export function actualizarDatosCuenta(id, cambios) {
+    const filtro = { _id: new ObjectId(id) };
+    const actualizacion = { $set: cambios };
+
+    if (Object.hasOwn(cambios, "contrasenaHash")) {
+        filtro.rol = "encargado";
+        actualizacion.$inc = { versionAcceso: 1 };
+    }
+
     return baseDatos.collection("cuentas").findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: cambios },
+        filtro,
+        actualizacion,
         {
             returnDocument: "after",
             projection: { _id: 1, nombre: 1, correo: 1, rol: 1, estado: 1 },

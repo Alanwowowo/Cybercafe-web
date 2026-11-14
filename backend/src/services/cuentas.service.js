@@ -73,6 +73,19 @@ export async function editarCuenta(id, datos) {
     const cambios = {};
 
     for (const campo of campos) {
+        if (campo === "contrasena") {
+            const contrasena = datos.contrasena;
+
+            if (
+                typeof contrasena !== "string" || !contrasena.trim() ||
+                contrasena.length < 12 || contrasena.length > 128
+            ) {
+                return { error: "CONTRASENA_INVALIDA" };
+            }
+
+            continue;
+        }
+
         if (!Object.hasOwn(validadores, campo)) {
             return { error: "DATOS_INVALIDOS" };
         }
@@ -83,6 +96,10 @@ export async function editarCuenta(id, datos) {
         }
 
         cambios[campo] = valor;
+    }
+
+    if (Object.hasOwn(datos, "contrasena")) {
+        cambios.contrasenaHash = await generarHash(datos.contrasena);
     }
 
     const cuenta = await actualizarDatosCuenta(id, cambios);

@@ -12,6 +12,7 @@ import { prepararClientes } from "./repositories/clientes.repository.js";
 import { prepararSesionesUso } from "./repositories/sesiones-uso.repository.js";
 import { obtenerClientes, crearCliente } from "./controllers/clientes.controller.js";
 import { crearSesionUso, cerrarSesionUsoHttp, obtenerSesionesUsoActivas } from "./controllers/sesiones-uso.controller.js";
+import { obtenerTarifa, modificarTarifa } from "./controllers/tarifa.controller.js";
 
 const app = express();
 
@@ -29,6 +30,8 @@ app.patch("/api/sesiones-uso/:id/cerrar", requerirAuth, express.json({ limit: "4
 app.post("/api/equipos", requerirAuth, express.json({ limit: "4kb" }), crearEquipo);
 app.patch("/api/equipos/:id", requerirAuth, express.json({ limit: "4kb" }), modificarEquipo);
 app.post("/api/auth/login", express.json({ limit: "4kb" }), login);
+app.get("/api/tarifa", requerirAuth, obtenerTarifa);
+app.patch("/api/tarifa", requerirAuth, express.json({ limit: "4kb" }), modificarTarifa);
 
 app.get("/api/auth/me", requerirAuth, (req, res) => {
     res.json({ usuario: req.usuario });

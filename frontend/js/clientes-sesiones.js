@@ -30,7 +30,8 @@ document.addEventListener('alpine:init', () => {
     init() {
       this.cargarConfiguracionChris();
       if (usarSesionesApi) {
-        this.cargarSesionesDesdeApi();
+        const equipoIdMapa = new URLSearchParams(window.location.search).get("equipo");
+        this.cargarSesionesDesdeApi(equipoIdMapa);
         return;
       }
       this.cargarComputadoresAlan();
@@ -182,7 +183,7 @@ document.addEventListener('alpine:init', () => {
       localStorage.setItem('cybernet_clientes', JSON.stringify(this.clientes));
     },
 
-    async cargarSesionesDesdeApi() {
+    async cargarSesionesDesdeApi(equipoIdMapa = null) {
       this.cargandoSesionesUso = true;
       this.mensajeError = '';
 
@@ -213,6 +214,16 @@ document.addEventListener('alpine:init', () => {
           }),
           costosAdicionales: 0
         }));
+        if (this.computadores.some(equipo => equipo.id === equipoIdMapa)) {
+            this.selectComputador = equipoIdMapa;
+        }
+
+        if (this.sesionesActivas.some(sesion => sesion.computadorId === equipoIdMapa)) {
+            this.$nextTick(() => {
+                document.getElementById("sesion-equipo-" + equipoIdMapa)
+                    ?.scrollIntoView({ block: "center" });
+            });
+        }
       } catch (error) {
         this.mensajeError = error.message || 'No se pudieron cargar las sesiones activas.';
       } finally {

@@ -55,11 +55,17 @@ export async function modificarEquipo(req, res, next) {
         }
 
         if (resultado.error === "DATOS_INVALIDOS") {
-            return res.status(400).json({ mensaje: "Revisa el nombre y la ubicación." });
+            return res.status(400).json({ mensaje: "Revisa el nombre, la ubicación o el estado." });
         }
 
         if (resultado.error === "EQUIPO_NO_ENCONTRADO") {
             return res.status(404).json({ mensaje: "No se encontró el equipo." });
+        }
+
+        if (resultado.error === "EQUIPO_EN_USO") {
+            return res.status(409).json({
+                mensaje: "Finaliza la sesión activa antes de cambiar el estado del equipo."
+            });
         }
 
         return res.status(200).json(resultado);

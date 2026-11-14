@@ -96,16 +96,23 @@
                 <template x-for="sesion in sesionesActivas" :key="sesion.id">
                     <div id="detalle-resumen" style="margin-bottom: 20px;">
                         <p><strong>Cliente:</strong> <span x-text="sesion.cliente"></span></p>
-                        <p><strong>Computador:</strong> <span x-text="sesion.computador"></span></p>
+
+                        <p :id="'sesion-equipo-' + sesion.computadorId">
+                            <strong>Computador:</strong> <span x-text="sesion.computador"></span>
+                        </p>
+
                         <p><strong>Hora de inicio:</strong> <span x-text="sesion.horaInicioTexto"></span></p>
                         <p><strong>Estado:</strong> En curso</p>
-                        
+
                         <div>
                             <label>Costos extras ($):</label>
-                            <input type="number" x-model.number="sesion.costosAdicionales" min="0" placeholder="0" :disabled="guardandoSesionUso || cargandoSesionesUso">
+                            <input type="number" x-model.number="sesion.costosAdicionales"
+                                min="0" placeholder="0"
+                                :disabled="guardandoSesionUso || cargandoSesionesUso">
                         </div>
 
-                        <button type="button" @click="finalizarSesionDesdeApi(sesion)" :disabled="guardandoSesionUso || cargandoSesionesUso">
+                        <button type="button" @click="finalizarSesionDesdeApi(sesion)"
+                            :disabled="guardandoSesionUso || cargandoSesionesUso">
                             Finalizar y cobrar
                         </button>
                     </div>
