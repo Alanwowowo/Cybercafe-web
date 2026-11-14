@@ -83,13 +83,15 @@
                         placeholder="Ejemplo: juan.perez@cybernet.com" required>
                 </div>
 
-                <div class="campo-formulario" x-show="idEdicion === null">
-                    <label for="contrasena-cuenta">Contraseña:</label>
+                <div class="campo-formulario" x-show="idEdicion === null || rol === 'Encargado'">
+                    <label for="contrasena-cuenta"
+                        x-text="idEdicion === null ? 'Contraseña:' : 'Nueva contraseña (opcional):'">
+                    </label>
                     <input type="password" id="contrasena-cuenta"
                         x-model="contrasena" autocomplete="new-password"
                         minlength="12" maxlength="128"
                         :required="idEdicion === null"
-                        :disabled="idEdicion !== null">
+                        :disabled="idEdicion !== null && rol !== 'Encargado'">
                 </div>
 
                 <div class="campo-formulario">

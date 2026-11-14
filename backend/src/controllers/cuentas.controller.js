@@ -46,6 +46,12 @@ export async function modificarCuenta(req, res, next) {
             });
         }
 
+        if (resultado.error === "CONTRASENA_INVALIDA") {
+            return res.status(400).json({
+                mensaje: "La contraseña debe tener entre 12 y 128 caracteres."
+            });
+        }
+
         if (resultado.error === "CUENTA_NO_ENCONTRADA") {
             return res.status(404).json({ mensaje: "No se encontró la cuenta." });
         }

@@ -40,6 +40,10 @@ function gestionMapaEquipos() {
                 return "Fuera de servicio";
             }
 
+            if (estado === "reservado") {
+                return "Reservado";
+            }
+
             return "Disponible";
         },
 
@@ -50,6 +54,10 @@ function gestionMapaEquipos() {
 
             if (estado === "fuera-servicio") {
                 return "punto-fuera-servicio";
+            }
+
+            if (estado === "reservado") {
+                return "punto-reservado";
             }
 
             return "punto-disponible";
@@ -103,6 +111,9 @@ function gestionComputadores() {
     return {
         computadores: [],
         mensajeComputadores: "Cargando equipos...",
+        tarifaHora: "",
+        guardandoTarifa: false,
+        mensajeTarifa: "",
         formularioVisible: false,
         guardandoComputador: false,
         idEdicion: null,
@@ -119,10 +130,44 @@ function gestionComputadores() {
                 const sesion = await window.sesionCyberNetLista;
                 if (!sesion) return;
 
-                this.computadores = await sesion.listarEquipos();
+                this.computadores = await sesion.listarEquipos({ paraMapa: true });
                 this.mensajeComputadores = "Listado de MongoDB";
             } catch {
                 this.mensajeComputadores = "No se pudo cargar el listado de equipos.";
+            }
+
+            await this.cargarTarifa();
+        },
+
+        async cargarTarifa() {
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) return;
+
+                const tarifa = await sesion.obtenerTarifa();
+                this.tarifaHora = tarifa.tarifaHora;
+            } catch {
+                this.mensajeTarifa = "No se pudo cargar la tarifa.";
+            }
+        },
+
+        async guardarTarifa() {
+            if (this.guardandoTarifa) return;
+
+            this.guardandoTarifa = true;
+            this.mensajeTarifa = "";
+
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
+
+                const tarifa = await sesion.actualizarTarifa(Number(this.tarifaHora));
+                this.tarifaHora = tarifa.tarifaHora;
+                this.mensajeTarifa = "Tarifa guardada.";
+            } catch (error) {
+                this.mensajeTarifa = error.message || "No se pudo guardar la tarifa.";
+            } finally {
+                this.guardandoTarifa = false;
             }
         },
 
@@ -171,10 +216,19 @@ function gestionComputadores() {
                     this.computadores.push(equipo);
                     this.mensajeComputadores = "Equipo agregado: " + equipo.nombre;
                 } else {
-                    const equipo = await sesion.editarEquipo(id, { nombre, ubicacion });
+                    const cambios = { nombre, ubicacion };
+                    const computador = this.computadores.find(actual => actual.id === id);
+
+                    if (computador && this.estado !== computador.estado) {
+                        cambios.estado = this.estado;
+                    }
+
+                    const equipo = await sesion.editarEquipo(id, cambios);
+
                     this.computadores = this.computadores.map(
-                        computador => computador.id === id ? equipo : computador
+                        actual => actual.id === id ? equipo : actual
                     );
+
                     this.mensajeComputadores = "Equipo actualizado: " + equipo.nombre;
                 }
 
@@ -215,7 +269,7 @@ function gestionComputadores() {
             const computador = this.computadores.find(equipo => equipo.id === id);
             if (!computador) return;
 
-            if (this.tieneSesionActiva(computador)) {
+            if (computador.estado === "ocupado") {
                 alert("No puedes editar este computador mientras tenga una sesión activa.");
                 return;
             }
@@ -227,38 +281,30 @@ function gestionComputadores() {
             this.formularioVisible = true;
         },
 
-        eliminarComputador(id) {
-            const computador = this.computadores.find(
-                (computador) => computador.id === id
-            );
+        async cambiarEstadoComputador(computador) {
+            if (this.guardandoComputador || computador.estado === "ocupado") return;
 
-            if (!computador) {
-                return;
-            }
+            const estado = computador.estado === "fuera-servicio"
+                ? "disponible"
+                : "fuera-servicio";
 
-            if (this.tieneSesionActiva(computador)) {
-                alert(
-                    "No puedes eliminar este computador " +
-                    "mientras tenga una sesión activa."
+            this.guardandoComputador = true;
+
+            try {
+                const sesion = await window.sesionCyberNetLista;
+                if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
+
+                const equipo = await sesion.editarEquipo(computador.id, { estado });
+                this.computadores = this.computadores.map(
+                    actual => actual.id === equipo.id ? equipo : actual
                 );
-                return;
+
+                this.mensajeComputadores = equipo.nombre + ": " + this.textoEstado(equipo.estado);
+            } catch (error) {
+                this.mensajeComputadores = error.message || "No se pudo cambiar el estado.";
+            } finally {
+                this.guardandoComputador = false;
             }
-
-            const confirmar = confirm(
-                "¿Deseas eliminar el equipo " +
-                    computador.nombre +
-                    "?"
-            );
-
-            if (!confirmar) {
-                return;
-            }
-
-            this.computadores = this.computadores.filter(
-                (computador) => computador.id !== id
-            );
-
-            this.guardarEnStorage();
         },
 
         get computadoresVisibles() {
@@ -306,6 +352,10 @@ function gestionComputadores() {
                 return "Fuera de servicio";
             }
 
+            if (estado === "reservado") {
+                return "Reservado";
+            }
+
             return "Disponible";
         },
 
@@ -316,6 +366,10 @@ function gestionComputadores() {
 
             if (estado === "fuera-servicio") {
                 return "punto-fuera-servicio";
+            }
+
+            if (estado === "reservado") {
+                return "punto-reservado";
             }
 
             return "punto-disponible";
@@ -424,9 +478,15 @@ function gestionCuentas() {
                 const sesion = await window.sesionCyberNetLista;
                 if (!sesion) throw new Error("Recarga la página para verificar tu sesión.");
 
+                const cambios = { nombre, correo };
+
+                if (idEdicion !== null && rol === "Encargado" && contrasena !== "") {
+                    cambios.contrasena = contrasena;
+                }
+
                 const cuenta = idEdicion === null
                     ? await sesion.crearCuenta({ nombre, correo, rol, estado, contrasena })
-                    : await sesion.editarCuenta(idEdicion, { nombre, correo });
+                    : await sesion.editarCuenta(idEdicion, cambios);
 
                 const cuentaVisible = {
                     ...cuenta,
@@ -486,6 +546,7 @@ function gestionCuentas() {
             this.correo = cuenta.correo;
             this.rol = cuenta.rol;
             this.estado = cuenta.estado;
+            this.contrasena = "";
             this.formularioVisible = true;
         },
 

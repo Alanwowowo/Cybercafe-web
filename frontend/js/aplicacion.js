@@ -191,14 +191,14 @@ window.sesionCyberNetLista = (async function () {
             return respuesta.json();
         },
 
-        async editarEquipo(id, { nombre, ubicacion }) {
+        async editarEquipo(id, cambios) {
             const respuesta = await fetch("/api/equipos/" + encodeURIComponent(id), {
                 method: "PATCH",
                 headers: {
                     Authorization: "Bearer " + accessToken,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ nombre, ubicacion })
+                body: JSON.stringify(cambios)
             });
 
             if (respuesta.status === 401) {
@@ -235,14 +235,14 @@ window.sesionCyberNetLista = (async function () {
             return respuesta.json();
         },
 
-        async editarCuenta(id, { nombre, correo }) {
+        async editarCuenta(id, cambios) {
             const respuesta = await fetch("/api/cuentas/" + encodeURIComponent(id), {
                 method: "PATCH",
                 headers: {
                     Authorization: "Bearer " + accessToken,
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ nombre, correo }),
+                body: JSON.stringify(cambios),
             });
 
             if (respuesta.status === 401) {
@@ -316,7 +316,7 @@ window.sesionCyberNetLista = (async function () {
             }
 
             return respuesta.json();
-        },        
+        },
 
         async listarClientes() {
             const respuesta = await fetch("/api/clientes", {
@@ -372,6 +372,37 @@ window.sesionCyberNetLista = (async function () {
             if (!respuesta.ok) {
                 const error = await respuesta.json().catch(() => null);
                 throw new Error(error?.mensaje || "No se pudo crear la cuenta.");
+            }
+
+            return respuesta.json();
+        },
+
+        async obtenerTarifa() {
+            const respuesta = await fetch("/api/tarifa", {
+                headers: { Authorization: "Bearer " + accessToken },
+                cache: "no-store"
+            });
+
+            if (!respuesta.ok) {
+                throw new Error("No se pudo cargar la tarifa.");
+            }
+
+            return respuesta.json();
+        },
+
+        async actualizarTarifa(tarifaHora) {
+            const respuesta = await fetch("/api/tarifa", {
+                method: "PATCH",
+                headers: {
+                    Authorization: "Bearer " + accessToken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ tarifaHora })
+            });
+
+            if (!respuesta.ok) {
+                const error = await respuesta.json().catch(() => null);
+                throw new Error(error?.mensaje || "No se pudo guardar la tarifa.");
             }
 
             return respuesta.json();

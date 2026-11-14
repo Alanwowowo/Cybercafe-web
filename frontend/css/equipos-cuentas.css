@@ -74,6 +74,10 @@
     background-color: #ef4444;
 }
 
+.punto-reservado {
+    background-color: #3b82f6;
+}
+
 .filtro-equipos {
     display: flex;
     align-items: center;

@@ -91,8 +91,12 @@
 
                 <div class="campo-formulario">
                     <label for="estado-computador">Estado:</label>
-                    <input type="text" id="estado-computador"
-                        :value="textoEstado(estado)" readonly>
+                    <select id="estado-computador" x-model="estado"
+                        :disabled="idEdicion === null || guardandoComputador">
+                        <option value="disponible">Disponible</option>
+                        <option value="reservado">Reservado</option>
+                        <option value="fuera-servicio">Fuera de servicio</option>
+                    </select>
                 </div>
 
                 <div class="campo-formulario">
@@ -118,11 +122,31 @@
                 </div>
             </form>
 
+            <form class="formulario-computador"
+                @submit.prevent="guardarTarifa()">
+                <h3>Tarifa por hora</h3>
+
+                <div class="campo-formulario">
+                    <label for="tarifa-hora">Precio por hora (CLP)</label>
+                    <input id="tarifa-hora" type="number" min="1" step="1"
+                        x-model="tarifaHora" :disabled="guardandoTarifa" required>
+                </div>
+
+                <div class="acciones-formulario">
+                    <button type="submit" class="boton-guardar" :disabled="guardandoTarifa">
+                        Guardar tarifa
+                    </button>
+                </div>
+
+                <p role="status" x-text="mensajeTarifa"></p>
+            </form>
+
             <div class="controles-computadores">
                 <input type="search" placeholder="Buscar por nombre o ubicación"
                     x-model="busqueda">
 
                 <select x-model="filtroEstado">
+                    <option value="reservado">Reservados</option>
                     <option value="todos">Todos los estados</option>
                     <option value="disponible">Disponibles</option>
                     <option value="ocupado">En uso</option>
@@ -172,9 +196,9 @@
                                     </button>
 
                                     <button type="button" class="boton-eliminar"
-                                        disabled
-                                        @click="eliminarComputador(computador.id)">
-                                        Eliminar
+                                        :disabled="guardandoComputador || computador.estado === 'ocupado'"
+                                        @click="cambiarEstadoComputador(computador)"
+                                        x-text="computador.estado === 'fuera-servicio' ? 'Activar' : 'Desactivar'">
                                     </button>
                                 </td>
                             </tr>

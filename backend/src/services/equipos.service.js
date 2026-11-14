@@ -2,6 +2,7 @@ import { buscarEquipos, insertarEquipo, actualizarEquipo } from "../repositories
 import { buscarIdsEquiposOcupados } from "../repositories/sesiones-uso.repository.js";
 
 const UBICACIONES_VALIDAS = new Set(["Sala principal", "Sala secundaria"]);
+const ESTADOS_EDITABLES = new Set(["disponible", "reservado", "fuera-servicio"]);
 
 export async function listarEquipos({ incluirOcupacion = false } = {}) {
     const equipos = await buscarEquipos();
@@ -45,7 +46,7 @@ export async function editarEquipo(id, datos) {
     }
 
     const campos = Object.keys(datos);
-    const limites = { nombre: 80, ubicacion: 120 };
+    const limites = { nombre: 80, ubicacion: 120, estado: 20 };
     const cambios = {};
 
     if (campos.length === 0) {
@@ -66,7 +67,19 @@ export async function editarEquipo(id, datos) {
             return { error: "DATOS_INVALIDOS" };
         }
 
+        if (campo === "estado" && !ESTADOS_EDITABLES.has(valor)) {
+            return { error: "DATOS_INVALIDOS" };
+        }
+
         cambios[campo] = valor;
+    }
+
+    if (cambios.estado !== undefined) {
+        const ocupados = await buscarIdsEquiposOcupados();
+
+        if (ocupados.includes(id.toLowerCase())) {
+            return { error: "EQUIPO_EN_USO" };
+        }
     }
 
     const equipo = await actualizarEquipo(id, cambios);
