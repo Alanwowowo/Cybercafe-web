@@ -42,7 +42,7 @@ export async function modificarCuenta(req, res, next) {
 
         if (resultado.error === "DATOS_INVALIDOS") {
             return res.status(400).json({
-                mensaje: "Revisa el identificador, el nombre o el correo. Solo se pueden editar el nombre y el correo."
+                mensaje: "Revisa el identificador, el nombre o el correo."
             });
         }
 
